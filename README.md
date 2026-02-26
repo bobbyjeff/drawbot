@@ -45,3 +45,13 @@ Read data and generate complex charts and diagrams, export to SVG, and finalize 
 ![Cloud agents chart in DrawBot](https://github.com/user-attachments/assets/ef7d7b56-c757-4d88-b02b-301d5fc977b1)
 
 ![Cloud agents chart final](https://github.com/user-attachments/assets/1a8f33c7-334a-4ae7-9d1a-6b82a7673767)
+
+## Using Cursor
+
+Open this folder in [Cursor](https://www.cursor.com/) and use Agent to create and iterate on scripts directly. Some things to try:
+
+- "Create a new script based on `_template.py` that draws …"
+- "Iterate on this script to change the color scheme / layout / animation"
+- "The export looks like [description] — adjust the script to fix it"
+
+Agent can read existing scripts for context, write new ones, and update the `saveFile` flag to trigger exports.
