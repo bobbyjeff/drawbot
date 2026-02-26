@@ -1,0 +1,3 @@
+mode	        sessions	p50_min	 p75_min	 p90_min	p95_min
+Not Sandboxed	17967199	0.52	 2.78	     11.24	    24.85
+Sandboxed	     2438938	0.05	 0.2	     1.0	    2.53

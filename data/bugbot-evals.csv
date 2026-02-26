@@ -1,0 +1,13 @@
+label,date,avg_bugs_per_run,resolution_rate
+Dedupe,2025-08-08,0.45,0.49
+Agentic validator,2025-08-18,0.45,0.515
+Agentic bugbot,2025-08-23,0.47,0.525
+Validator,2025-09-28,0.52,0.502
+New Validator + Agentic Experiment,2025-10-31,0.465,0.575
+Reflection #1,2025-11-07,0.625,0.61
+No files in context,2025-11-17,0.66,0.66
+Opus,2025-11-24,0.50,0.74
+Reflection prompt update,2025-12-02,0.55,0.73
+prior_missing_checks,2025-12-09,0.63,0.75
+Missing checks,2025-12-09,0.76,0.73
+,2026-02-18,0.84,0.76

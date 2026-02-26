@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M0,0 l2400,0 l0,1100 l-2400,0 Z" fill="rgb(255,255,255)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,96 l2208,0" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,297.78 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,499.56 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,701.33 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,903.11 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M247.96,96 l300.71,0 l0,44.39 l-300.71,0 Z" fill="rgb(231,76,60)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M562.66,96 l300.71,0 l0,5.04 l-300.71,0 Z" fill="rgb(39,174,96)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M947.29,96 l300.71,0 l0,221.96 l-300.71,0 Z" fill="rgb(231,76,60)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1261.99,96 l300.71,0 l0,19.17 l-300.71,0 Z" fill="rgb(39,174,96)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1646.63,96 l300.71,0 l0,830.32 l-300.71,0 Z" fill="rgb(231,76,60)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1961.33,96 l300.71,0 l0,82.73 l-300.71,0 Z" fill="rgb(39,174,96)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,439.60904947916674,9.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" stroke-linecap="round" stroke-linejoin="round" x="10" y="1047">
+   p50 (Median)
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1214.9677734375,9.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" stroke-linecap="round" stroke-linejoin="round" x="10" y="1047">
+   p75
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1914.3011067708335,9.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" stroke-linecap="round" stroke-linejoin="round" x="10" y="1047">
+   p90
+  </tspan>
+ </text>
+</svg>
