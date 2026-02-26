@@ -20,3 +20,28 @@ cursor-drawbot/
 2. Duplicate `scripts/_template.py` as a starting point
 3. Set `saveFile = True` when ready to export
 4. Press **Run** (⌘R) to execute — exports are saved to `exports/` automatically
+
+## Examples
+
+### Graphics
+
+Use DrawBot scripts to generate Cursor header images and graphics for blogs, 
+documents, and more.
+
+![Self-driving codebases blog header image](https://github.com/user-attachments/assets/550f2463-9c5a-4835-a20b-d0daae1fa27c)
+
+![Cursor ASCII](https://github.com/user-attachments/assets/6d5d84ed-9352-44f0-bab7-a5cbc2b33ff8)
+
+DrawBot even supports exporting to animated GIFs and MP4 videos.
+
+![Secure indexes blog multiple artboards](https://github.com/user-attachments/assets/12171314-eb5b-421e-86f1-e74657bdf512)
+
+![Secure indexes blog GIF](https://github.com/user-attachments/assets/6c519f6f-b06d-4e82-ab2b-4945f889dfc3)
+
+### Charts
+
+Read data and generate complex charts and diagrams, export to SVG, and finalize in Figma.
+
+![Cloud agents chart in DrawBot](https://github.com/user-attachments/assets/ef7d7b56-c757-4d88-b02b-301d5fc977b1)
+
+![Cloud agents chart final](https://github.com/user-attachments/assets/1a8f33c7-334a-4ae7-9d1a-6b82a7673767)
