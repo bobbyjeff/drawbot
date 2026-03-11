@@ -1,0 +1,12 @@
+Model,CursorBench,Tokens (Mean),Steps (Median),Tokens (Median),SWE-Bench,SWE-Bench Pro,AFC,ScatterPlot,SWE-Bench,AFC
+GPT52,56.5,22.5,32,18,80,55.6,43.2,yes,yes,yes
+GPT54,63.9,18.4,31,15.8,,57.7,40.4,yes,,yes
+Opus46,58.2,17,40,20.4,80.8,53.6,43.1,yes,yes,yes
+Opus45,48.4,23.4,34,15.2,80.9,51.6,46.7,yes,yes,yes
+Gemini31,50.7,20.5,30,16.2,80.6,54.2,45.5,yes,yes,yes
+Composer15,44.2,14,27,12.6,74.8,50.8,48,yes,yes,yes
+GLM5,42.7,18,44,15.1,77.8,48.7,49.3,yes,yes,yes
+Kimi25,36.5,11.9,32,10.7,76.8,48.2,50.7,yes,yes,yes
+Sonnet45,37.9,15,31,14,77.2,43.6,51.2,yes,yes,yes
+Haiku45,29.4,17,44,14.4,73.3,39.5,55.3,yes,yes,yes
+GPT-5,39.4,13.2,27,11.9,74.9,,,yes,yes,

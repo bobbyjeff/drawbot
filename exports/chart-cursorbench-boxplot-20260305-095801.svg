@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <text text-anchor="start" transform="matrix(1,0,0,1,130.298828125,-249.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   Cursor Bench v3
+  </tspan>
+ </text>
+ <path d="M492,277.07 l691.68,0 l0,74.86 l-691.68,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1470,277.07 l108.27,0 l0,74.86 l-108.27,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,218.36328125,-468.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   SWE-Bench
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,389.529296875,-418.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   Pro
+  </tspan>
+ </text>
+ <path d="M492,474.07 l334.05,0 l0,74.86 l-334.05,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1470,474.07 l677.93,0 l0,74.86 l-677.93,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,218.36328125,-665.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   SWE-Bench
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,237.892578125,-615.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   Multilingual
+  </tspan>
+ </text>
+ <path d="M492,671.07 l47.16,0 l0,74.86 l-47.16,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1470,671.07 l431.91,0 l0,74.86 l-431.91,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,218.36328125,-862.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   SWE-Bench
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,311.21875,-812.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="44" x="20" y="1035">
+   Verified
+  </tspan>
+ </text>
+ <path d="M492,868.07 l27.51,0 l0,74.86 l-27.51,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1470,868.07 l334.05,0 l0,74.86 l-334.05,0 Z" fill="rgb(140,140,140)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M492,216 l0,788" fill="rgb(140,140,140)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M688.5,216 l0,788" fill="rgb(140,140,140)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M885,216 l0,788" fill="rgb(140,140,140)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1081.5,216 l0,788" fill="rgb(140,140,140)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1278,216 l0,788" fill="rgb(140,140,140)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,472.54541015625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   0
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,650.13623046875,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   100
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,846.63623046875,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   200
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1043.13623046875,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   300
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1239.63623046875,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   400
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,609.8251953125,-65.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="10" y="1047">
+   Mean Gold Patch Lines Changed
+  </tspan>
+ </text>
+ <path d="M1470,216 l0,788" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1666.5,216 l0,788" fill="rgb(0,0,0)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1863,216 l0,788" fill="rgb(0,0,0)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M2059.5,216 l0,788" fill="rgb(0,0,0)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M2256,216 l0,788" fill="rgb(0,0,0)" stroke="rgb(209,209,209)" stroke-dasharray="12,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1450.54541015625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   0
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1618.681640625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   1000
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1815.181640625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   2000
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2011.681640625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   3000
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2208.181640625,-117.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="34" x="10" y="1049">
+   4000
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1580.85546875,-65.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="10" y="1047">
+   Mean Problem Description Length
+  </tspan>
+ </text>
+</svg>

@@ -1,0 +1,10 @@
+model,cursorbench_pct,median_steps,swe_bench_pro,swe_bench_verified,tokens_k,tokens_approximate
+haiku,32.00,,,73.0,8,false
+kimi2.5,36.00,30.5,,76.8,12,true
+sonnet4.5,37.92,31.0,43.6,77.2,15,false
+glm5,42.10,44.0,,77.8,18.2,false
+composer1.5,44.88,27.0,50.8,74.0,14.2,false
+opus4.5,48.62,32.0,51.6,80.5,17.2,false
+gemini3.1pro,50.13,30.0,48.0,80.6,17,true
+opus4.6,57.10,39.0,53.6,80.8,24,false
+gpt-5.3-codex,61.77,34.0,56.8,80.0,17.5,false

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M376,96 l0,908" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M376,214.04 l1676.52,0 l0,63.56 l-1676.52,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M376,141.4 l1676.52,0 l0,63.56 l-1676.52,0 Z" fill="rgb(91,127,168)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2068.521739130435,-158.48080000000004)">
+  <tspan fill="rgb(188,84,71)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   352
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2068.521739130435,-85.84079999999994)">
+  <tspan fill="rgb(91,127,168)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   8
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,-0.15625,-136.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   CursorBench v3
+  </tspan>
+ </text>
+ <path d="M376,441.04 l1019.25,0 l0,63.56 l-1019.25,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M376,368.4 l838.26,0 l0,63.56 l-838.26,0 Z" fill="rgb(91,127,168)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1411.2490118577075,-385.48080000000004)">
+  <tspan fill="rgb(188,84,71)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   214
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1230.2608695652175,-312.84079999999994)">
+  <tspan fill="rgb(91,127,168)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   4
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,-0.15625,-363.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   CursorBench v2
+  </tspan>
+ </text>
+ <path d="M376,668.04 l862.08,0 l0,63.56 l-862.08,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M376,595.4 l628.7,0 l0,63.56 l-628.7,0 Z" fill="rgb(91,127,168)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1254.0750988142292,-612.4807999999998)">
+  <tspan fill="rgb(188,84,71)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   181
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1020.695652173913,-539.8408)">
+  <tspan fill="rgb(91,127,168)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   3
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,-0.15625,-590.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   CursorBench v1
+  </tspan>
+ </text>
+ <path d="M376,895.04 l776.34,0 l0,63.56 l-776.34,0 Z" fill="rgb(188,84,71)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M376,822.4 l628.7,0 l0,63.56 l-628.7,0 Z" fill="rgb(91,127,168)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1168.3438735177867,-839.4807999999998)">
+  <tspan fill="rgb(188,84,71)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   163 lines of code
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1020.695652173913,-766.8408)">
+  <tspan fill="rgb(91,127,168)" font-family="Helvetica-Bold" font-size="46" x="0" y="1033">
+   3 files
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,-0.15625,-817.5)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   CursorBench v0
+  </tspan>
+ </text>
+</svg>
