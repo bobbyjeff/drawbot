@@ -2,7 +2,7 @@
 
 A collection of [DrawBot](https://www.drawbot.com/) scripts and their exported outputs.
 
-[DrawBot](https://www.drawbot.com/) is a free macOS application for generating two-dimensional graphics through Python scripting. It supports rectangles, ovals, bezier paths, text, and transparency, and can export to PDF, SVG, PNG, JPEG, TIFF, and video formats.
+[DrawBot](https://www.drawbot.com/) is a free macOS application for generating two-dimensional graphics through Python scripting. It supports rectangles, ovals, bezier paths, text, and transparency, and can export to PDF, SVG, PNG, JPEG, TIFF, and video formats. You can check out [this website](https://dailydrawbot.tumblr.com/) for some inspiration.
 
 ## Structure
 
