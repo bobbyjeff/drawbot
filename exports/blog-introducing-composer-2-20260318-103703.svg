@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1260" viewBox="0 0 2400 1260" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M0,0 l2400,0 l0,1260 l-2400,0 Z" fill="rgb(247,240,235)" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M592.8,1164 l1214.4,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M575.71,1152.05 l1248.59,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M562.74,1138.63 l1274.52,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M549.53,1122.77 l1300.94,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M535.1,1103.48 l1329.8,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M518.87,1079.79 l1362.25,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M500.46,1050.71 l1399.08,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M479.55,1015.28 l1440.89,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M455.92,972.52 l1488.17,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M429.35,921.43 l1541.3,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M399.7,861.05 l1600.6,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M366.83,790.4 l1666.34,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M330.61,708.5 l1738.78,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M290.94,614.37 l1818.12,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M247.73,507.04 l1904.54,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M200.89,385.51 l1998.23,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M150.33,248.83 l2099.33,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M96,96.0 l2208,0" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M592.8,1164 l1214.4,0" fill="none" stroke="rgb(245,78,0)" stroke-linecap="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+</svg>

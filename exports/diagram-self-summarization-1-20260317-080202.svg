@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1260" viewBox="0 0 2400 1260" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M0,0 l2400,0 l0,1260 l-2400,0 Z" fill="rgb(250,250,250)" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M144,1046 l417,0 l0,162 l-417,0 Z" fill="rgb(148,156,168)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,156.0,-1058.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="59.11" y="1169">
+   User request
+  </tspan>
+ </text>
+ <path d="M144,446 l417,0 l0,576 l-417,0 Z" fill="rgb(30,85,99)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,156.0,-458.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="133.78" y="755">
+   Agent
+  </tspan>
+ </text>
+ <path d="M352.5,1046 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M144,350 l417,0 l0,72 l-417,0 Z" fill="rgb(245,78,0)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,156.0,-362.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="36" stroke-linecap="round" stroke-linejoin="round" x="58.47" y="1247">
+   Summary prompt
+  </tspan>
+ </text>
+ <path d="M144,218 l417,0 l0,108 l-417,0 Z" fill="rgb(30,85,99)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,156.0,-230.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="28.46" y="1223">
+   Self-summary 1
+  </tspan>
+ </text>
+ <path d="M352.5,446 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M352.5,350 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M873,1100 l417,0 l0,108 l-417,0 Z" fill="rgb(148,156,168)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,885.0,-1112.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="28.46" y="1223">
+   Self-summary 1
+  </tspan>
+ </text>
+ <path d="M591,272 l126,0" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M717,272 l0,882" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M717,1154 l126,0" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M873,464 l417,0 l0,612 l-417,0 Z" fill="rgb(30,85,99)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,885.0,-476.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="133.78" y="719">
+   Agent
+  </tspan>
+ </text>
+ <path d="M1081.5,1100 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M873,368 l417,0 l0,72 l-417,0 Z" fill="rgb(245,78,0)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,885.0,-380.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="36" stroke-linecap="round" stroke-linejoin="round" x="58.47" y="1247">
+   Summary prompt
+  </tspan>
+ </text>
+ <path d="M873,200 l417,0 l0,144 l-417,0 Z" fill="rgb(30,85,99)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,885.0,-212.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="28.46" y="1187">
+   Self-summary 2
+  </tspan>
+ </text>
+ <path d="M1081.5,464 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M1081.5,368 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M1602,1064 l417,0 l0,144 l-417,0 Z" fill="rgb(148,156,168)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1614.0,-1076.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="28.46" y="1187">
+   Self-summary 2
+  </tspan>
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="123.79" y="1245">
+   + state
+  </tspan>
+ </text>
+ <path d="M1320,272 l126,0" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M1446,272 l0,864" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M1446,1136 l126,0" fill="none" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M1602,752 l417,0 l0,288 l-417,0 Z" fill="rgb(30,85,99)" stroke="rgb(229,231,235)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1614.0,-764.0)">
+  <tspan fill="rgb(255,255,255)" font-family="Helvetica" font-size="48" stroke-linecap="round" stroke-linejoin="round" x="133.78" y="1043">
+   Agent
+  </tspan>
+ </text>
+ <path d="M1810.5,1064 l0,-24" fill="rgb(255,255,255)" stroke="rgb(127,127,127)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M96,420 l2208,0" fill="rgb(255,255,255)" stroke="rgb(107,114,128)" stroke-dasharray="8,6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" transform="matrix(1,0,0,-1,0,1260)"/>
+ <path d="M96,120 l2208,0" fill="rgb(255,255,255)" stroke="rgb(55,65,81)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,104.0,-373.0)">
+  <tspan fill="rgb(107,114,128)" font-family="Helvetica" font-size="48" stroke="rgb(55,65,81)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.12" x="0" y="1189">
+   Trigger
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,104.0,-73.0)">
+  <tspan fill="rgb(55,65,81)" font-family="Helvetica" font-size="48" stroke="rgb(55,65,81)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.12" x="0" y="1189">
+   Hard cap
+  </tspan>
+ </text>
+ <path d="M2047.9,164.1 c5.47,5.47,5.47,14.33,0,19.8 c-5.47,5.47,-14.33,5.47,-19.8,0 c-5.47,-5.47,-5.47,-14.33,0,-19.8 c5.47,-5.47,14.33,-5.47,19.8,0 Z M2047.9,164.1" fill="rgb(30,85,99)" stroke="rgb(55,65,81)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0,1260)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2068.0,-87.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" stroke="rgb(55,65,81)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.12" x="0" y="1189">
+   Trained as reward
+  </tspan>
+ </text>
+</svg>

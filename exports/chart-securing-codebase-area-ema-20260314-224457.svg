@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1000.0" viewBox="0 0 2400 1000.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M96,96 l2208,0" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M96,365.33 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M96,634.67 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M96,904 l2208,0" fill="rgb(0,0,0)" stroke="rgb(216,216,216)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M202.65,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M432.72,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M670.47,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M908.21,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M1138.29,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M1376.03,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M1606.11,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M1843.85,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M2081.59,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M2296.33,96 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M264,96 l0,124.7 l53.68,13.09 l53.68,5.28 l53.68,-0.26 l53.68,14.52 l53.68,25.03 l53.68,22.78 l53.68,42.2 l53.68,31.8 l53.68,12.24 l53.68,-1.45 l53.68,17.73 l53.68,-3.26 l53.68,-3.33 l53.68,3.48 l53.68,14.88 l53.68,11.39 l53.68,19.93 l53.68,32.13 l53.68,72.99 l53.68,-5.87 l53.68,-30.61 l53.68,-14.4 l53.68,15.94 l53.68,-33.85 l53.68,27.45 l53.68,62.77 l53.68,4.59 l53.68,-77.67 l53.68,-41.52 l53.68,83.41 l53.68,69.13 l53.68,28.03 l53.68,66.24 l26.84,25.65 l0,-635.18 Z M264,96" fill="rgb(106,156,208)" fill-opacity="0.25" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M2062.42,96 l0,635.18 l26.84,25.65 l53.68,73.08 l53.68,26.51 l53.68,39.4 l53.68,80.59 l0,-880.41 Z M2062.42,96" fill="rgb(245,78,0)" fill-opacity="0.2" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M2062.42,96 l0,635.18 l26.84,25.65 l53.68,73.08 l53.68,26.51 l53.68,39.4 l53.68,80.59 l0,-880.41 l0,851.56 l-53.68,-83.14 l-53.68,-48.6 l-53.68,-18.91 l-53.68,-50.57 l-26.84,-15.16 Z M2062.42,96" fill="rgb(204,34,0)" fill-opacity="0.75" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <path d="M264,220.7 l53.68,13.09 l53.68,5.28 l53.68,-0.26 l53.68,14.52 l53.68,25.03 l53.68,22.78 l53.68,42.2 l53.68,31.8 l53.68,12.24 l53.68,-1.45 l53.68,17.73 l53.68,-3.26 l53.68,-3.33 l53.68,3.48 l53.68,14.88 l53.68,11.39 l53.68,19.93 l53.68,32.13 l53.68,72.99 l53.68,-5.87 l53.68,-30.61 l53.68,-14.4 l53.68,15.94 l53.68,-33.85 l53.68,27.45 l53.68,62.77 l53.68,4.59 l53.68,-77.67 l53.68,-41.52 l53.68,83.41 l53.68,69.13 l53.68,28.03 l53.68,66.24 l53.68,51.3 l53.68,73.08 l53.68,26.51 l53.68,39.4 l53.68,80.59" fill="none" stroke="rgb(0,0,0)" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.45" stroke-width="5" transform="matrix(1,0,0,-1,0.0,1000.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-63.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="0" y="957">
+   0
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-332.33333333333326)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="0" y="957">
+   1k
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-601.6666666666665)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="0" y="957">
+   2k
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-871.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="0" y="957">
+   3k weekly PRs created
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,382.69055451127815,-5.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="10" y="957">
+   Jul '25
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1776.2431787476503,-5.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" stroke-linecap="round" stroke-linejoin="round" x="10" y="957">
+   Jan 2026
+  </tspan>
+ </text>
+</svg>

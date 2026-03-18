@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1500.0" viewBox="0 0 2400 1500.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M624,428 l1680,0 l0,48 l-1680,0 Z" fill="rgb(234,234,234)" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M944,428 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1264,428 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1584,428 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1904,428 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M944,428 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1264,428 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1584,428 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1904,428 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,919.5400390625,-357.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   45
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1239.5400390625,-357.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   46
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1559.5400390625,-357.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   47
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1879.5400390625,-357.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   48
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,323.5439453125,-413.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="20" y="1461">
+   CursorBench Hard 80k
+  </tspan>
+ </text>
+ <path d="M2175.36,428 l0,48" fill="rgb(0,0,0)" stroke="rgb(107,114,128)" stroke-dasharray="6,4" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2142.0045312499997,-445.0)">
+  <tspan fill="rgb(107,114,128)" font-family="Helvetica" font-size="24" x="10" y="1463">
+   48.8
+  </tspan>
+ </text>
+ <path d="M1882.25,435.03 c9.37,9.37,9.37,24.57,0,33.94 c-9.37,9.37,-24.57,9.37,-33.94,0 c-9.37,-9.37,-9.37,-24.57,0,-33.94 c9.37,-9.37,24.57,-9.37,33.94,0 Z M1882.25,435.03" fill="rgb(59,130,246)" stroke="rgb(255,255,255)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1831.9245312499993,-445.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1463">
+   47.9
+  </tspan>
+ </text>
+ <path d="M1516.49,435.03 c9.37,9.37,9.37,24.57,0,33.94 c-9.37,9.37,-24.57,9.37,-33.94,0 c-9.37,-9.37,-9.37,-24.57,0,-33.94 c9.37,-9.37,24.57,-9.37,33.94,0 Z M1516.49,435.03" fill="rgb(245,115,0)" stroke="rgb(255,255,255)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1466.164531249999,-445.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1463">
+   46.7
+  </tspan>
+ </text>
+ <path d="M624,170 l1680,0 l0,48 l-1680,0 Z" fill="rgb(234,234,234)" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M944,170 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1264,170 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1584,170 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1904,170 l0,48" fill="rgb(234,234,234)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M944,170 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1264,170 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1584,170 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1904,170 l0,-8" fill="rgb(234,234,234)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,919.5400390625,-99.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   45
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1239.5400390625,-99.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   46
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1559.5400390625,-99.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   47
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1879.5400390625,-99.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="10" y="1461">
+   48
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,323.5439453125,-155.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="26" x="20" y="1461">
+   CursorBench Hard 40k
+  </tspan>
+ </text>
+ <path d="M2175.36,170 l0,48" fill="rgb(0,0,0)" stroke="rgb(107,114,128)" stroke-dasharray="6,4" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <path d="M1704.97,177.03 c9.37,9.37,9.37,24.57,0,33.94 c-9.37,9.37,-24.57,9.37,-33.94,0 c-9.37,-9.37,-9.37,-24.57,0,-33.94 c9.37,-9.37,24.57,-9.37,33.94,0 Z M1704.97,177.03" fill="rgb(59,130,246)" stroke="rgb(255,255,255)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1654.644531250001,-187.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1463">
+   47.3
+  </tspan>
+ </text>
+ <path d="M752.65,177.03 c9.37,9.37,9.37,24.57,0,33.94 c-9.37,9.37,-24.57,9.37,-33.94,0 c-9.37,-9.37,-9.37,-24.57,0,-33.94 c9.37,-9.37,24.57,-9.37,33.94,0 Z M752.65,177.03" fill="rgb(245,115,0)" stroke="rgb(255,255,255)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,702.3245312499989,-187.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1463">
+   44.3
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,931.7529296875,-1357.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="10" y="1447">
+   CursorBench Hard score by context and compaction method
+  </tspan>
+ </text>
+ <path d="M2024,1310 l24,0 l0,24 l-24,0 Z" fill="rgb(59,130,246)" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2056.0,-1269.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="0" y="1447">
+   Self-summarization
+  </tspan>
+ </text>
+ <path d="M2024,1270 l24,0 l0,24 l-24,0 Z" fill="rgb(245,115,0)" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2056.0,-1229.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="0" y="1447">
+   Standard compaction
+  </tspan>
+ </text>
+ <path d="M2024,1230 l24,0 l0,24 l-24,0 Z" fill="rgb(107,114,128)" transform="matrix(1,0,0,-1,0.0,1500.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2056.0,-1189.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="36" x="0" y="1447">
+   Full context (ref)
+  </tspan>
+ </text>
+</svg>

@@ -1,0 +1,6 @@
+method,hard_score,delta_vs_self_summary_baseline_percent,summary_tokens_group_value
+y | baseline,48.848000,0.000000,
+y | 80000,47.879000,-1.983705,1008
+y | 40000,47.325000,-3.117835,
+n | 80000,46.736000,-4.323616,5183
+n | 40000,44.349000,-9.210203,

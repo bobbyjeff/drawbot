@@ -2,7 +2,7 @@
 # Add motion
 
 # Flags
-shouldSave = 1
+shouldSave = 0
 isAnimated = 0  # 0 = still (png/svg), 1 = animation (gif/mp4)
 showRandomFill = 1  # 0 = no fill, 1 = fill random cell per panel
 

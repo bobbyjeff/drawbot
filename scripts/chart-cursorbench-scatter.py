@@ -82,7 +82,7 @@ x_ticks = [4, 8, 12, 16, 20, 24]
 y_ticks  = [30, 40, 50, 60, 70]
 
 def x_to_px(val):
-    return chart_x + (val - x_min) / (x_max - x_min) * chart_w
+    return chart_x + (x_max - val) / (x_max - x_min) * chart_w
 
 def y_to_py(val):
     return chart_y + (val - y_min) / (y_max - y_min) * chart_h
@@ -174,7 +174,7 @@ for _family, (fcolor, members) in FAMILIES.items():
 if show_labels:
     stroke(None); fill(0.5, 0.5, 0.5, 0.55)
     font("Helvetica"); fontSize(34)
-    text("← Token efficiency frontier", (grid_x_left, chart_y + chart_h - label_gap - 34), align="left")
+    text("Token efficiency frontier →", (chart_x + chart_w - margin_right, chart_y + chart_h - label_gap - 34), align="right")
 
 # Dots
 for pt in points:

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M840,120 l0,544" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1206,120 l0,544" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1572,120 l0,544" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1938,120 l0,544" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M2304,120 l0,544" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="1" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M840,120 l0,-8" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,822.2138671875,-45.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="10" y="1057">
+   0
+  </tspan>
+ </text>
+ <path d="M1206,120 l0,-8" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1180.427734375,-45.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="10" y="1057">
+   25
+  </tspan>
+ </text>
+ <path d="M1572,120 l0,-8" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1546.427734375,-45.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="10" y="1057">
+   50
+  </tspan>
+ </text>
+ <path d="M1938,120 l0,-8" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1912.427734375,-45.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="10" y="1057">
+   75
+  </tspan>
+ </text>
+ <path d="M2304,120 l0,-8" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2270.6416015625,-45.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="10" y="1057">
+   100
+  </tspan>
+ </text>
+ <path d="M840,600 l1099.46,0 l0,64 l-1099.46,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-573.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="0" y="1053">
+   GPT-5.4
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,733.71875,-573.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="20" y="1053">
+   75.1
+  </tspan>
+ </text>
+ <path d="M840,480 l875.47,0 l0,64 l-875.47,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-453.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="0" y="1053">
+   Composer 2
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,733.71875,-453.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="20" y="1053">
+   59.8
+  </tspan>
+ </text>
+ <path d="M840,360 l849.12,0 l0,64 l-849.12,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-333.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="0" y="1053">
+   Opus 4.6
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,733.71875,-333.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="20" y="1053">
+   58.0
+  </tspan>
+ </text>
+ <path d="M840,240 l701.26,0 l0,64 l-701.26,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-213.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="0" y="1053">
+   Composer 1.5
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,733.71875,-213.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="20" y="1053">
+   47.9
+  </tspan>
+ </text>
+ <path d="M840,120 l609.02,0 l0,64 l-609.02,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-93.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="0" y="1053">
+   Sonnet 4.5
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,733.71875,-93.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="20" y="1053">
+   41.6
+  </tspan>
+ </text>
+</svg>

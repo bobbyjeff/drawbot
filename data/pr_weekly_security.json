@@ -1,0 +1,12 @@
+{
+  "agent_start_date": "2026-01-21",
+  "note": "Weekly security findings from security-findings.md. Weeks are Monday-anchored. prs_with_findings = unique PRs that had at least one current vulnerability finding. findings = total finding count.",
+  "weekly_findings": {
+    "2026-02-02": { "prs_with_findings": 46,  "findings": 70  },
+    "2026-02-09": { "prs_with_findings": 151, "findings": 219 },
+    "2026-02-16": { "prs_with_findings": 163, "findings": 274 },
+    "2026-02-23": { "prs_with_findings": 130, "findings": 189 },
+    "2026-03-02": { "prs_with_findings": 130, "findings": 176 },
+    "2026-03-09": { "prs_with_findings": 52,  "findings": 69  }
+  }
+}
