@@ -1,7 +1,7 @@
 model,score,med,scatter
 GPT-5.4 High,63.9,1.3987,yes
 GPT-5.4 Med,63.5,0.8943,yes
-Composer 2 (kimi) @0.25cr,59.0,0.3468,no
+Composer 2 (kimi) @0.25cr,60.4,0.3468,no
 GPT-5.3 Codex High,59.1,0.7869,no
 Opus 4.6 High,58.2,2.5226,yes
 GPT-5.2 High,56.5,0.8796,no
@@ -14,7 +14,7 @@ Opus 4.6 Med,52.9,1.6443,yes
 Opus 4.5 High,48.4,1.9532,no
 Opus 4.6 Low,47.7,1.0567,yes
 Composer 1.5,44.8,0.9517,yes
-Composer 2,59.0,0.3468,yes
+Composer 2,60.4,0.3468,yes
 Sonnet 4.6 Low,47.25,0.8067,no
 GPT-5.2 Low,46.5,0.4839,no
 GPT-5.3 Codex Low,42.9,0.3249,no
