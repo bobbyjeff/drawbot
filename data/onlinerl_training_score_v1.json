@@ -1,0 +1,202 @@
+[
+  {
+    "step": 0,
+    "current_avg_score": 0.02468736939724564,
+    "baseline_avg_score": 0.02468736939724564
+  },
+  {
+    "step": 2,
+    "current_avg_score": 0.05436035334880576,
+    "baseline_avg_score": -0.01511454125807577
+  },
+  {
+    "step": 4,
+    "current_avg_score": 0.04038037796114503,
+    "baseline_avg_score": 0.03427122177749877
+  },
+  {
+    "step": 5,
+    "current_avg_score": 0.07580130052626328,
+    "baseline_avg_score": 0.08860896784913365
+  },
+  {
+    "step": 6,
+    "current_avg_score": 0.0797827549870671,
+    "baseline_avg_score": 0.051156033889213186
+  },
+  {
+    "step": 7,
+    "current_avg_score": 0.091962946085029,
+    "baseline_avg_score": 0.1015798113218645
+  },
+  {
+    "step": 8,
+    "current_avg_score": 0.0860476345772398,
+    "baseline_avg_score": 0.06931515124310539
+  },
+  {
+    "step": 9,
+    "current_avg_score": 0.07113018651779192,
+    "baseline_avg_score": 0.04734468469397796
+  },
+  {
+    "step": 10,
+    "current_avg_score": 0.09508956567829151,
+    "baseline_avg_score": 0.060935839211234494
+  },
+  {
+    "step": 11,
+    "current_avg_score": 0.10763480899910463,
+    "baseline_avg_score": null
+  },
+  {
+    "step": 12,
+    "current_avg_score": 0.0966449141311298,
+    "baseline_avg_score": 0.06996068558058448
+  },
+  {
+    "step": 13,
+    "current_avg_score": 0.07918611611671598,
+    "baseline_avg_score": 0.06591103829659424
+  },
+  {
+    "step": 14,
+    "current_avg_score": 0.06321572200407855,
+    "baseline_avg_score": 0.05813669428208008
+  },
+  {
+    "step": 15,
+    "current_avg_score": 0.10180361451899714,
+    "baseline_avg_score": 0.08881256180271947
+  },
+  {
+    "step": 16,
+    "current_avg_score": 0.09644532804939826,
+    "baseline_avg_score": 0.06015381549538581
+  },
+  {
+    "step": 17,
+    "current_avg_score": 0.11557475517195558,
+    "baseline_avg_score": 0.08006215572576084
+  },
+  {
+    "step": 18,
+    "current_avg_score": 0.08163821499913616,
+    "baseline_avg_score": 0.04744494080994801
+  },
+  {
+    "step": 19,
+    "current_avg_score": 0.10733706379507357,
+    "baseline_avg_score": 0.06702748094941509
+  },
+  {
+    "step": 20,
+    "current_avg_score": 0.11079010101667039,
+    "baseline_avg_score": 0.026530882908073445
+  },
+  {
+    "step": 21,
+    "current_avg_score": 0.09942483484303997,
+    "baseline_avg_score": 0.061537295748939846
+  },
+  {
+    "step": 22,
+    "current_avg_score": 0.09428934541828246,
+    "baseline_avg_score": 0.057930609775775355
+  },
+  {
+    "step": 23,
+    "current_avg_score": 0.11932536075358459,
+    "baseline_avg_score": 0.0698848506108432
+  },
+  {
+    "step": 24,
+    "current_avg_score": 0.0993755238744288,
+    "baseline_avg_score": 0.03994660532898158
+  },
+  {
+    "step": 25,
+    "current_avg_score": 0.13217969929458384,
+    "baseline_avg_score": 0.11002385736092112
+  },
+  {
+    "step": 26,
+    "current_avg_score": 0.12062875656772733,
+    "baseline_avg_score": 0.07098579063483938
+  },
+  {
+    "step": 27,
+    "current_avg_score": 0.11012426738983012,
+    "baseline_avg_score": 0.0904317746486473
+  },
+  {
+    "step": 28,
+    "current_avg_score": 0.11833881292457053,
+    "baseline_avg_score": 0.08115858888374192
+  },
+  {
+    "step": 29,
+    "current_avg_score": 0.10641074668007122,
+    "baseline_avg_score": 0.06114585324152103
+  },
+  {
+    "step": 30,
+    "current_avg_score": 0.147853643888885,
+    "baseline_avg_score": 0.08350876153449398
+  },
+  {
+    "step": 31,
+    "current_avg_score": 0.18186353149143603,
+    "baseline_avg_score": 0.14254770266004663
+  },
+  {
+    "step": 32,
+    "current_avg_score": 0.16283045618794892,
+    "baseline_avg_score": 0.11279623670366874
+  },
+  {
+    "step": 33,
+    "current_avg_score": 0.18470659513848778,
+    "baseline_avg_score": 0.1360611594049381
+  },
+  {
+    "step": 35,
+    "current_avg_score": 0.14676492838848104,
+    "baseline_avg_score": 0.08956235433494171
+  },
+  {
+    "step": 36,
+    "current_avg_score": 0.18044597692972625,
+    "baseline_avg_score": 0.10380752312968664
+  },
+  {
+    "step": 37,
+    "current_avg_score": 0.16247931056319928,
+    "baseline_avg_score": 0.14181292364555267
+  },
+  {
+    "step": 38,
+    "current_avg_score": 0.1294273725158881,
+    "baseline_avg_score": 0.07297298558316422
+  },
+  {
+    "step": 40,
+    "current_avg_score": 0.1909734895837173,
+    "baseline_avg_score": 0.09089855811308424
+  },
+  {
+    "step": 41,
+    "current_avg_score": 0.17944866148915492,
+    "baseline_avg_score": 0.123187446336992
+  },
+  {
+    "step": 42,
+    "current_avg_score": 0.1720525458507395,
+    "baseline_avg_score": 0.07770777926945126
+  },
+  {
+    "step": 43,
+    "current_avg_score": 0.18730771116822043,
+    "baseline_avg_score": 0.06067855043581836
+  }
+]

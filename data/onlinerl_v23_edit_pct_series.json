@@ -1,0 +1,213 @@
+{
+  "description": "edit_pct from training_scores (model vs baseline_stats), same pairing as analyze_isft_run plot_combined_metrics Edit % subplot.",
+  "source_s3": "s3://asphr-training-data/online-rl-analysis/base-1210-rl-0128-v23/2026-02-11T19-18-36Z_a1ecd9e7-05e5-4117-ae05-fae14c692276/summary.json",
+  "exclude_max_step_from_eval_only": false,
+  "excluded_max_step": null,
+  "edit_pct_by_step": [
+    {
+      "step": 0,
+      "current_model_edit_pct": 54.598238003771534,
+      "baseline_edit_pct": 54.598238003771534
+    },
+    {
+      "step": 1,
+      "current_model_edit_pct": 54.39852042457382,
+      "baseline_edit_pct": 54.717751817661956
+    },
+    {
+      "step": 2,
+      "current_model_edit_pct": 53.98479566234718,
+      "baseline_edit_pct": 53.59186038091101
+    },
+    {
+      "step": 3,
+      "current_model_edit_pct": 55.03030183778679,
+      "baseline_edit_pct": 53.1277910757029
+    },
+    {
+      "step": 4,
+      "current_model_edit_pct": 53.41928887879131,
+      "baseline_edit_pct": 53.5788137130419
+    },
+    {
+      "step": 5,
+      "current_model_edit_pct": 53.644770904034914,
+      "baseline_edit_pct": 53.41967502889388
+    },
+    {
+      "step": 6,
+      "current_model_edit_pct": 54.405160963885905,
+      "baseline_edit_pct": 53.21015995260664
+    },
+    {
+      "step": 7,
+      "current_model_edit_pct": 53.81715456616235,
+      "baseline_edit_pct": 53.60840380750124
+    },
+    {
+      "step": 8,
+      "current_model_edit_pct": 53.55813645216221,
+      "baseline_edit_pct": 55.463055595255106
+    },
+    {
+      "step": 9,
+      "current_model_edit_pct": 51.859630982001484,
+      "baseline_edit_pct": 52.551846426644055
+    },
+    {
+      "step": 10,
+      "current_model_edit_pct": 52.22684687212583,
+      "baseline_edit_pct": 53.46212163755827
+    },
+    {
+      "step": 11,
+      "current_model_edit_pct": 53.053385627694404,
+      "baseline_edit_pct": 53.66704805491991
+    },
+    {
+      "step": 12,
+      "current_model_edit_pct": 51.94457508773199,
+      "baseline_edit_pct": 53.83810022367106
+    },
+    {
+      "step": 13,
+      "current_model_edit_pct": 51.45405389227531,
+      "baseline_edit_pct": 54.36879775941358
+    },
+    {
+      "step": 14,
+      "current_model_edit_pct": 51.964073152256255,
+      "baseline_edit_pct": 52.50668780342812
+    },
+    {
+      "step": 15,
+      "current_model_edit_pct": 52.99323821998796,
+      "baseline_edit_pct": 55.073004038521276
+    },
+    {
+      "step": 16,
+      "current_model_edit_pct": 51.163627442963445,
+      "baseline_edit_pct": 51.37843125629929
+    },
+    {
+      "step": 17,
+      "current_model_edit_pct": 51.69382036611353,
+      "baseline_edit_pct": 52.346872985170855
+    },
+    {
+      "step": 18,
+      "current_model_edit_pct": 52.98587405196178,
+      "baseline_edit_pct": 54.57125481451449
+    },
+    {
+      "step": 19,
+      "current_model_edit_pct": 51.33987099480832,
+      "baseline_edit_pct": 53.81012169209966
+    },
+    {
+      "step": 20,
+      "current_model_edit_pct": 52.1222363827783,
+      "baseline_edit_pct": 52.68511335229722
+    },
+    {
+      "step": 21,
+      "current_model_edit_pct": 50.16079244413729,
+      "baseline_edit_pct": 51.49279223884676
+    },
+    {
+      "step": 22,
+      "current_model_edit_pct": 50.96131800465101,
+      "baseline_edit_pct": 53.463882416203624
+    },
+    {
+      "step": 23,
+      "current_model_edit_pct": 49.9431926980277,
+      "baseline_edit_pct": 52.83853329044709
+    },
+    {
+      "step": 24,
+      "current_model_edit_pct": 49.591005920748394,
+      "baseline_edit_pct": 51.6316721477359
+    },
+    {
+      "step": 25,
+      "current_model_edit_pct": 49.459748459697536,
+      "baseline_edit_pct": 53.12835507229824
+    },
+    {
+      "step": 26,
+      "current_model_edit_pct": 49.268256668915086,
+      "baseline_edit_pct": 53.139588196065354
+    },
+    {
+      "step": 27,
+      "current_model_edit_pct": 48.895399875868776,
+      "baseline_edit_pct": 53.55124276472591
+    },
+    {
+      "step": 28,
+      "current_model_edit_pct": 47.72026886025576,
+      "baseline_edit_pct": 52.88506969052681
+    },
+    {
+      "step": 29,
+      "current_model_edit_pct": 47.38084060191248,
+      "baseline_edit_pct": 53.12412145066067
+    },
+    {
+      "step": 30,
+      "current_model_edit_pct": 45.7346581897545,
+      "baseline_edit_pct": 52.21342610671306
+    },
+    {
+      "step": 31,
+      "current_model_edit_pct": 44.26132349947917,
+      "baseline_edit_pct": 50.26357550663043
+    },
+    {
+      "step": 32,
+      "current_model_edit_pct": 43.97641458935527,
+      "baseline_edit_pct": 53.05653145959758
+    },
+    {
+      "step": 33,
+      "current_model_edit_pct": 41.024220175013276,
+      "baseline_edit_pct": 51.70676537117006
+    },
+    {
+      "step": 34,
+      "current_model_edit_pct": 41.48138918062552,
+      "baseline_edit_pct": 53.399390897782354
+    },
+    {
+      "step": 35,
+      "current_model_edit_pct": 41.01247664168822,
+      "baseline_edit_pct": 52.84575199340116
+    },
+    {
+      "step": 36,
+      "current_model_edit_pct": 45.453629032258064,
+      "baseline_edit_pct": 52.89734793995058
+    },
+    {
+      "step": 37,
+      "current_model_edit_pct": 44.36439693237276,
+      "baseline_edit_pct": 51.3821962972356
+    },
+    {
+      "step": 38,
+      "current_model_edit_pct": 44.69349292897323,
+      "baseline_edit_pct": 53.18481986123882
+    },
+    {
+      "step": 39,
+      "current_model_edit_pct": 44.849936948297604,
+      "baseline_edit_pct": 53.52025436676715
+    },
+    {
+      "step": 40,
+      "current_model_edit_pct": 43.64128413832996,
+      "baseline_edit_pct": 52.03998129530044
+    }
+  ]
+}

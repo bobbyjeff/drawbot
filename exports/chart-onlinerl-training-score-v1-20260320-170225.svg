@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1050.0" viewBox="0 0 2400 1050.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M96,96 l2208,0" fill="rgb(0,0,0)" stroke="rgb(227,227,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M96,320.34 l2208,0" fill="rgb(0,0,0)" stroke="rgb(227,227,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M96,544.68 l2208,0" fill="rgb(0,0,0)" stroke="rgb(227,227,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M96,769.02 l2208,0" fill="rgb(0,0,0)" stroke="rgb(227,227,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M96,96 l2208,0" fill="rgb(0,0,0)" stroke="rgb(146,146,142)" stroke-dasharray="10,8" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M284,206.77 l93.95,-53.58 l93.95,28.97 l46.98,93.42 l46.98,14.98 l46.98,78.36 l46.98,11.42 l46.98,-21.58 l46.98,3.19 l46.98,8.31 l46.98,11.89 l46.98,2.87 l46.98,-8.45 l46.98,35.37 l46.98,-13.82 l46.98,17.13 l46.98,-31.92 l46.98,4.02 l46.98,-51.7 l46.98,10.93 l46.98,2.8 l46.98,18.05 l46.98,-27.66 l46.98,74.96 l46.98,-0.07 l46.98,26.12 l46.98,5.8 l46.98,-22.87 l46.98,14.09 l46.98,89.33 l46.98,22.49 l46.98,47.06 l93.95,-29.65 l46.98,-1.58 l46.98,50.05 l46.98,-57.63 l93.95,-16.21 l46.98,32.12 l46.98,-38.74 l46.98,-50.04" fill="none" stroke="rgb(184,184,179)" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M284,206.77 l93.95,39.94 l93.95,9.14 l46.98,54.08 l46.98,43.21 l46.98,46.64 l46.98,24.69 l46.98,-2.8 l46.98,30.29 l46.98,38.09 l46.98,11.87 l46.98,-15.19 l46.98,-32.13 l46.98,29.45 l46.98,13.4 l46.98,35.13 l46.98,-21.09 l46.98,19.83 l46.98,18.53 l46.98,-2.33 l46.98,-8.54 l46.98,27.72 l46.98,-7.45 l46.98,38.94 l46.98,11.71 l46.98,-5.94 l46.98,6.9 l46.98,-11.23 l46.98,47.93 l46.98,79.33 l46.98,29.91 l46.98,50.38 l93.95,-15.8 l46.98,34.27 l46.98,-0.19 l46.98,-44.62 l93.95,51.61 l46.98,20.61 l46.98,4.47 l46.98,23.67" fill="none" stroke="rgb(245,78,0)" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M96,96 l2208,0" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M284,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M753.77,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M1223.53,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M1693.3,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M2163.07,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <path d="M2304,96 l0,-10" fill="none" stroke="rgb(17,17,17)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,240.0,-931.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica-Bold" font-size="34" stroke-linecap="round" stroke-linejoin="round" x="0" y="999">
+   Online RL training score v1
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2179.92578125,-951.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="20" y="1013">
+   EMA 0.30
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-67.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   0.00
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-291.34160670902656)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   0.05
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-515.6832134180531)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   0.10
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-740.0248201270797)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   0.15
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,267.326171875,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   0
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,730.4197856104652,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   10
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1200.1872274709303,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   20
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1669.9546693313953,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   30
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2139.7221111918607,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   40
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2280.65234375,-5.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   43
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1233.318359375,31.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   steps
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(6.123233995736766e-17,-1.0,1.0,6.123233995736766e-17,-965.0,587.0253906249999)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="10" y="1013">
+   avg score
+  </tspan>
+ </text>
+ <path d="M1804,970 l42,0 l0,8 l-42,0 Z" fill="rgb(245,78,0)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1856.0,-925.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   avg training score
+  </tspan>
+ </text>
+ <path d="M2063.43,970 l42,0 l0,8 l-42,0 Z" fill="rgb(184,184,179)" stroke-linecap="round" stroke-linejoin="round" transform="matrix(1,0,0,-1,0.0,1050.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2115.43359375,-925.0)">
+  <tspan fill="rgb(17,17,17)" font-family="Helvetica" font-size="24" stroke-linecap="round" stroke-linejoin="round" x="0" y="1013">
+   baseline
+  </tspan>
+ </text>
+</svg>
