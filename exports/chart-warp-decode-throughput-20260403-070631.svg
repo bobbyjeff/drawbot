@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M96,140 l2208,0" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,263.43 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,386.86 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,510.29 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,633.71 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,757.14 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,880.57 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,1004 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M460.8,140 l0,-10" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M870.4,140 l0,-10" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1280,140 l0,-10" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M1689.6,140 l0,-10" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M2099.2,140 l0,-10" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,979.31 l2208,0" fill="rgb(0,0,0)" stroke="rgb(96,96,96)" stroke-dasharray="16,10" stroke-width="3" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2111.734375,-948.3142857142857)">
+  <tspan fill="rgb(96,96,96)" font-family="Helvetica" font-size="28" x="20" y="1057">
+   6.8 TB/s peak
+  </tspan>
+ </text>
+ <path d="M374.78,140 l172.03,0 l0,253.03 l-172.03,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,426.782421875,-370.02857142857147)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1063">
+   30%
+  </tspan>
+ </text>
+ <path d="M784.38,140 l172.03,0 l0,364.11 l-172.03,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,836.3824218750001,-481.11428571428564)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1063">
+   43%
+  </tspan>
+ </text>
+ <path d="M1193.98,140 l172.03,0 l0,423.36 l-172.03,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1245.982421875,-540.3600000000001)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1063">
+   50%
+  </tspan>
+ </text>
+ <path d="M1603.58,140 l172.03,0 l0,460.39 l-172.03,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1655.5824218750001,-577.3885714285714)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1063">
+   55%
+  </tspan>
+ </text>
+ <path d="M2013.18,140 l172.03,0 l0,487.54 l-172.03,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2065.182421875,-604.5428571428572)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="1063">
+   58%
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-232.42857142857156)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   1
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-355.8571428571429)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   2
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-479.2857142857142)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   3
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-602.7142857142858)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   4
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-726.1428571428571)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   5
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-849.5714285714284)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   6
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-973.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="1057">
+   7
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,421.8859375,-39.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="1053">
+   B=1
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,831.4859375000001,-39.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="1053">
+   B=4
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1241.0859375,-39.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="1053">
+   B=8
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1641.7875000000001,-39.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="1053">
+   B=16
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2051.3875,-39.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="1053">
+   B=32
+  </tspan>
+ </text>
+</svg>

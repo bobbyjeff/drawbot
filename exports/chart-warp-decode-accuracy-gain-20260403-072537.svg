@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="900.0" viewBox="0 0 2400 900.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="M96,150 l2208,0" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M96,368 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M96,586 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M96,804 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M614,150 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M1290,150 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M1966,150 l0,-10" fill="rgb(0,0,0)" stroke="rgb(0,0,0)" stroke-width="3" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M424.72,150 l162.24,0 l0,360.79 l-162.24,0 Z" fill="rgb(180,180,180)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M641.04,150 l162.24,0 l0,662.72 l-162.24,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,472.48453125000003,-487.78999999999996)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   66.2
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,682.130703125,-789.7199999999998)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   121.6
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,577.0908203125,-829.7199999999998)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="22" x="10" y="867">
+   1.84x
+  </tspan>
+ </text>
+ <path d="M1100.72,150 l162.24,0 l0,354.8 l-162.24,0 Z" fill="rgb(180,180,180)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M1317.04,150 l162.24,0 l0,652.37 l-162.24,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1148.48453125,-481.7950000000001)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   65.1
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1359.0154687499999,-779.365)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   119.7
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1253.0908203125,-819.365)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="22" x="10" y="867">
+   1.84x
+  </tspan>
+ </text>
+ <path d="M1776.72,150 l162.24,0 l0,349.89 l-162.24,0 Z" fill="rgb(180,180,180)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <path d="M1993.04,150 l162.24,0 l0,644.19 l-162.24,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1824.48453125,-476.8900000000001)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   64.2
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,2035.0154687499999,-771.19)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="24" x="10" y="863">
+   118.2
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1929.0908203125,-811.19)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="22" x="10" y="867">
+   1.84x
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-119.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="857">
+   0
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-337.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="857">
+   40
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-555.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="857">
+   80
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-773.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="28" x="0" y="857">
+   120
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,500.8203125,-47.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="853">
+   5k–10k tokens
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1167.921875,-47.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="853">
+   10k–20k tokens
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,1843.921875,-47.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="32" x="10" y="853">
+   20k–50k tokens
+  </tspan>
+ </text>
+ <path d="M276,814 l28,0 l0,28 l-28,0 Z" fill="rgb(180,180,180)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,318.0,-771.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="30" x="0" y="855">
+   Previous (Triton path)
+  </tspan>
+ </text>
+ <path d="M776,814 l28,0 l0,28 l-28,0 Z" fill="rgb(245,78,0)" transform="matrix(1,0,0,-1,0.0,900.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,818.0,-771.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="30" x="0" y="855">
+   Warp decode
+  </tspan>
+ </text>
+</svg>

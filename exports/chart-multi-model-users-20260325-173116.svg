@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2400" height="1100.0" viewBox="0 0 2400 1100.0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-611.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="0" y="1029">
+   User type
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,820.0,-611.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="0" y="1029">
+   Weekly active users using multiple model families
+  </tspan>
+ </text>
+ <path d="M96,636 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,288 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M96,456 l2208,0" fill="rgb(0,0,0)" stroke="rgb(224,224,224)" stroke-width="2" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <path d="M820,504 l1244.38,0 l0,72 l-1244.38,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-457.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="0" y="1029">
+   Power
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,621.8984375,-457.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   83.9%
+  </tspan>
+ </text>
+ <path d="M820,336 l983.38,0 l0,72 l-983.38,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-289.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="0" y="1029">
+   Regular
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,621.8984375,-289.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   66.3%
+  </tspan>
+ </text>
+ <path d="M820,168 l708.46,0 l0,72 l-708.46,0 Z" fill="rgb(0,0,0)" transform="matrix(1,0,0,-1,0.0,1100.0)"/>
+ <text text-anchor="start" transform="matrix(1,0,0,1,96.0,-121.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="0" y="1029">
+   Casual
+  </tspan>
+ </text>
+ <text text-anchor="start" transform="matrix(1,0,0,1,621.8984375,-121.0)">
+  <tspan fill="rgb(0,0,0)" font-family="Helvetica" font-size="48" x="20" y="1029">
+   47.7%
+  </tspan>
+ </text>
+</svg>

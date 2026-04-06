@@ -1,0 +1,4 @@
+prompt_range,base_tps,mega_tps,speedup,base_samples,mega_samples
+5K-10K,66.2,121.6,1.84x,7286,7521
+10K-20K,65.1,119.7,1.84x,26628,27584
+20K-50K,64.2,118.2,1.84x,9131,9326
