@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NVIDIA OG rings — preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d0d0c;
+        --panel: #141413;
+        --panel-elevated: #1a1a18;
+        --border: #2a2a28;
+        --border-subtle: #1f1f1d;
+        --text: #f5f4f1;
+        --muted: #8a8880;
+        --faint: #5c5b56;
+        --track: #2e2e2b;
+        --thumb: #eceae4;
+        --thumb-border: #0d0d0c;
+        --focus: rgba(245, 244, 241, 0.14);
+        --controls-width: 196px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.4;
+        padding: 16px 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 16px;
+        align-items: flex-start;
+      }
+      h1 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 2px;
+        width: 100%;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 0.75rem;
+        margin: 0 0 12px;
+        width: 100%;
+        line-height: 1.5;
+      }
+      .sub code {
+        font-size: 0.6875rem;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: var(--panel-elevated);
+        border: 1px solid var(--border-subtle);
+        color: var(--muted);
+      }
+      .preview-wrap {
+        flex: 1 1 520px;
+        min-width: 0;
+        overflow-x: auto;
+      }
+      .canvas-shell {
+        display: inline-block;
+        background: #000;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        line-height: 0;
+        vertical-align: top;
+      }
+      /* Bitmap 2400×1260; displayed at 50% (1200×630 CSS px). */
+      canvas#c {
+        width: 1200px;
+        height: 630px;
+        display: block;
+        vertical-align: middle;
+      }
+      .controls {
+        flex: 0 0 var(--controls-width);
+        width: var(--controls-width);
+        max-width: 100%;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 11px 12px;
+        box-shadow: 0 0 0 1px var(--border-subtle);
+      }
+      .controls h2 {
+        font-size: 0.625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--faint);
+        margin: 12px 0 6px;
+      }
+      .controls h2:first-child {
+        margin-top: 0;
+      }
+      .control {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 8px;
+      }
+      .control:last-child {
+        margin-bottom: 0;
+      }
+      .control .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+      .control .name {
+        font-size: 0.6875rem;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .control .val {
+        font-size: 0.6875rem;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color: var(--text);
+        flex-shrink: 0;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 14px;
+        margin: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+      input[type="range"]:focus-visible {
+        outline: none;
+      }
+      input[type="range"]:focus-visible::-webkit-slider-thumb {
+        box-shadow: 0 0 0 3px var(--focus);
+      }
+      input[type="range"]:focus-visible::-moz-range-thumb {
+        box-shadow: 0 0 0 3px var(--focus);
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 3px;
+        border-radius: 999px;
+        background: var(--track);
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 11px;
+        height: 11px;
+        margin-top: -4px;
+        border-radius: 50%;
+        background: var(--thumb);
+        border: 1px solid var(--thumb-border);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      }
+      input[type="range"]::-moz-range-track {
+        height: 3px;
+        border-radius: 999px;
+        background: var(--track);
+        border: none;
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--thumb);
+        border: 1px solid var(--thumb-border);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      }
+      input[type="color"] {
+        width: 100%;
+        height: 26px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--panel-elevated);
+        cursor: pointer;
+        padding: 2px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      button {
+        font: inherit;
+        font-size: 0.6875rem;
+        font-weight: 500;
+        padding: 6px 9px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--panel-elevated);
+        color: var(--text);
+        cursor: pointer;
+        letter-spacing: 0.01em;
+      }
+      button:hover {
+        background: #222220;
+        border-color: #353532;
+      }
+      button.primary {
+        background: #2a2a27;
+        border-color: #3d3d39;
+      }
+      .timeline {
+        margin-top: 8px;
+      }
+      code.snippet {
+        display: block;
+        font-size: 0.625rem;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 6px;
+        overflow-x: auto;
+        white-space: pre;
+        color: #b9b6ae;
+        line-height: 1.35;
+      }
+      .checkbox-row {
+        flex-direction: row;
+        align-items: center;
+        margin: 0 !important;
+        gap: 6px;
+        font-size: 0.6875rem;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .checkbox-row input {
+        accent-color: var(--thumb);
+        width: 13px;
+        height: 13px;
+        cursor: pointer;
+      }
+      .actions .control {
+        margin-bottom: 0;
+      }
+      .controls > button {
+        width: 100%;
+        margin-top: 2px;
+      }
+      .export-status {
+        font-size: 0.6875rem;
+        color: var(--muted);
+        margin-top: 4px;
+        min-height: 1.2em;
+        line-height: 1.35;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>NVIDIA OG rings</h1>
+    <p class="sub">
+      Bitmap is a strict <strong>2×</strong> map of <code>images/public/blog_og_nvidia_04.svg</code> (viewBox <strong>1200×630</strong> → <strong>2400×1260</strong>), origin <strong>(0,0)</strong>. The orange seed is clamped with the same horizontal inset as the SVG art (<code>cx − rOut</code> on the largest ring ≈ <strong>54</strong> logical from the left/right edges) so it doesn’t sit on the canvas edge. On <strong>Hold (full)</strong>, only the six rings (largest ring orange like SVG <code>cls-3</code>); no animated seed overlay. Defaults match SVG fills: bg <code>#3b4446</code>, rings <code>#dbdcdc</code>, seed stroke <code>#F54E00</code>. Seed X default aligns near the large ring center. Serve <code>preview/</code>:
+      <code>python3 -m http.server 8080</code>.
+    </p>
+
+    <aside class="controls">
+      <h2>Seed</h2>
+      <label class="control">
+        <span class="row"><span class="name">Hold</span><span class="val" id="vSeedHold">1</span></span>
+        <input type="range" id="seedHold" min="1" max="30" value="1" aria-label="Seed hold frames" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">X</span><span class="val" id="vSeedX">630</span></span>
+        <input type="range" id="seedX" min="200" max="1750" value="630" aria-label="Seed X (2× viewBox units)" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Radius</span><span class="val" id="vSeedR">476</span></span>
+        <input type="range" id="seedR" min="320" max="520" value="476" aria-label="Seed radius (2× viewBox units)" />
+      </label>
+
+      <h2>Motion</h2>
+      <label class="control">
+        <span class="row"><span class="name">Frames / step</span><span class="val" id="vMotionFr">10</span></span>
+        <input
+          type="range"
+          id="emergeFr"
+          min="3"
+          max="40"
+          value="10"
+          aria-label="Frames per step for emerge and collapse (same pace)"
+        />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Squash</span><span class="val" id="vSquash">0.50</span></span>
+        <input type="range" id="squash" min="0" max="85" value="50" aria-label="Mid-flight horizontal squeeze" />
+      </label>
+      <label class="control checkbox-row">
+        <input type="checkbox" id="screenBlend" aria-label="Screen blend overlaps" />
+        Screen blend
+      </label>
+
+      <h2>Hold</h2>
+      <label class="control">
+        <span class="row"><span class="name">Full</span><span class="val" id="vHoldFull">18</span></span>
+        <input type="range" id="holdFull" min="0" max="60" value="18" aria-label="Hold all rings" />
+      </label>
+
+      <h2>Color</h2>
+      <label class="control">
+        <span class="row"><span class="name">Background</span></span>
+        <input type="color" id="bgHex" value="#3b4446" aria-label="Background" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Ring tint</span></span>
+        <input type="color" id="fgHex" value="#dbdcdc" aria-label="Ring color" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Ring α</span><span class="val" id="vRingLayer">0.90</span></span>
+        <input type="range" id="ringLayer" min="15" max="100" value="90" aria-label="Ring fill opacity" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Seed stroke α</span><span class="val" id="vFgOp">0.9</span></span>
+        <input type="range" id="fgOp" min="20" max="100" value="90" aria-label="Seed outline opacity" />
+      </label>
+      <label class="control">
+        <span class="row"><span class="name">Stroke px (all)</span><span class="val" id="vSeedLw">3</span></span>
+        <input type="range" id="seedLw" min="1" max="10" value="3" aria-label="Stroke width for seed and all rings" />
+      </label>
+
+      <h2>Timing</h2>
+      <label class="control">
+        <span class="row"><span class="name">FPS</span><span class="val" id="vFps">12</span></span>
+        <input type="range" id="fps" min="2" max="30" value="12" aria-label="Preview FPS" />
+      </label>
+
+      <h2>Export</h2>
+      <button type="button" id="copyPy">Copy DrawBot hints</button>
+      <button type="button" id="exportGif">Export GIF</button>
+      <p class="export-status" id="exportGifStatus" aria-live="polite"></p>
+      <code class="snippet" id="pyOut"></code>
+    </aside>
+
+    <div class="preview-wrap">
+      <div class="canvas-shell">
+        <canvas id="c" width="2400" height="1260"></canvas>
+      </div>
+      <div class="timeline">
+        <label class="control">
+          <span class="row"><span class="name">Scrub</span><span class="val" id="frameLabel">—</span></span>
+          <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Scrub frame" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="play">Play</button>
+        <button type="button" id="pause">Pause</button>
+        <label class="control checkbox-row">
+          <input type="checkbox" id="loop" checked aria-label="Loop" />
+          Loop
+        </label>
+      </div>
+    </div>
+
+    <script src="vendor/gifjs/gif.js"></script>
+    <script src="nvidia-paths-embed.js"></script>
+    <script src="og-nvidia-preview.js"></script>
+  </body>
+</html>
