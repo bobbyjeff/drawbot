@@ -25,7 +25,7 @@
         --thumb: #eceae4;
         --thumb-border: #0d0d0c;
         --focus: rgba(245, 244, 241, 0.14);
-        --controls-width: 196px;
+        --controls-width: 224px;
       }
       * { box-sizing: border-box; }
       body {
@@ -44,11 +44,15 @@
       .sub { color: var(--muted); font-size: 0.75rem; margin: 0 0 12px; width: 100%; line-height: 1.5; }
       .sub code { font-size: 0.6875rem; padding: 1px 5px; border-radius: 4px; background: var(--panel-elevated); border: 1px solid var(--border-subtle); color: var(--muted); }
       .preview-wrap { flex: 1 1 520px; min-width: 0; overflow-x: auto; }
-      .canvas-shell { display: inline-block; background: #000; border-radius: 8px; border: 1px solid var(--border); line-height: 0; }
-      canvas#c { width: 100%; max-width: 1200px; height: auto; aspect-ratio: 2400 / 1260; display: block; }
+      .canvas-block { width: 100%; max-width: 1200px; }
+      .canvas-shell { display: block; background: #000; border-radius: 8px; border: 1px solid var(--border); line-height: 0; }
+      canvas#c { width: 100%; height: auto; aspect-ratio: 2400 / 1260; display: block; }
       .controls { flex: 0 0 var(--controls-width); width: var(--controls-width); max-width: 100%; padding: 0; }
       .controls h2 { font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); margin: 28px 0 8px; }
       .controls h2:first-child { margin-top: 0; }
+      .h2-row { display: flex; align-items: center; justify-content: space-between; margin: 28px 0 8px; }
+      .h2-row h2 { margin: 0; }
+      .h2-row .checkbox-row { margin: 0; font-size: 0.6875rem; color: var(--muted); }
       .control { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
       .control .row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
       .control .name { font-size: 0.6875rem; color: var(--muted); letter-spacing: 0.01em; white-space: nowrap; }
@@ -73,10 +77,35 @@
       .checkbox-row { flex-direction: row; align-items: center; margin: 0 !important; gap: 6px; font-size: 0.6875rem; color: var(--muted); cursor: pointer; }
       .checkbox-row input { accent-color: var(--thumb); width: 13px; height: 13px; cursor: pointer; }
       select { font: inherit; font-size: 0.6875rem; font-weight: 500; width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel-elevated); color: var(--text); cursor: pointer; -webkit-appearance: none; appearance: none; }
-      /* Swatch grid: hidden by default, revealed on hover of the parent control */
-      .swatch-grid { display: none; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
-      .control:hover .swatch-grid { display: flex; }
-      .swatch { width: 16px; height: 16px; border-radius: 3px; cursor: pointer; border: 1.5px solid transparent; flex-shrink: 0; transition: transform 0.1s, border-color 0.1s; }
+      /* Swatch grid: floats above the column on hover — does not push content */
+      .control { position: relative; }
+      .swatch-grid {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 100;
+        grid-template-columns: repeat(10, 16px);
+        gap: 3px;
+        padding: 8px;
+        background: var(--panel-elevated);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        width: fit-content;
+        box-sizing: border-box;
+      }
+      .control:hover .swatch-grid { display: grid; }
+      .swatch-grid::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: 0;
+        right: 0;
+        height: 6px;
+      }
+      .swatch-grid > div:not(.swatch) { grid-column: 1 / -1; }
+      .swatch { width: 16px; height: 16px; border-radius: 3px; cursor: pointer; border: 1.5px solid transparent; transition: transform 0.1s, border-color 0.1s; }
       .swatch:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.4); }
       .swatch.active { border-color: #fff; transform: scale(1.1); }
     </style>
@@ -117,31 +146,19 @@
         <div class="swatch-grid" id="bgSwatches"></div>
       </div>
       <div class="control">
-        <span class="row"><span class="name">Stroke color</span></span>
+        <span class="row"><span class="name">Stroke</span></span>
         <div class="color-row">
           <input type="color" id="fgHex" value="#F44E00" />
           <input type="text" id="fgText" value="#F44E00" maxlength="7" placeholder="#RRGGBB" />
         </div>
         <div class="swatch-grid" id="fgSwatches"></div>
       </div>
-      <div class="control">
-        <span class="row"><span class="name">Segment color</span></span>
-        <div class="color-row">
-          <input type="color" id="segHex" value="#EDECE8" />
-          <input type="text" id="segText" value="#EDECE8" maxlength="7" />
-        </div>
-      </div>
+
+      <h2>Form</h2>
       <label class="control">
         <span class="row"><span class="name">Stroke width</span><span class="val" id="vStrokeW">2</span></span>
         <input type="range" id="strokeW" min="1" max="6" value="2" />
       </label>
-
-      <div id="parametricControls" style="display:none">
-        <label class="control">
-          <span class="row"><span class="name">Curves</span><span class="val" id="vParamCurves">3</span></span>
-          <input type="range" id="paramCurves" min="2" max="9" value="3" />
-        </label>
-      </div>
 
       <div id="sphereControls" style="display:none">
         <label class="control">
@@ -150,8 +167,14 @@
         </label>
       </div>
 
+      <div id="parametricControls" style="display:none">
+        <label class="control">
+          <span class="row"><span class="name">Curves</span><span class="val" id="vParamCurves">3</span></span>
+          <input type="range" id="paramCurves" min="2" max="9" value="3" />
+        </label>
+      </div>
+
       <div id="speedControls" style="display:none">
-        <h2>Speed</h2>
         <label class="control">
           <span class="row"><span class="name">Space</span><span class="val" id="vSpace">50</span></span>
           <input type="range" id="speedSpace" min="0" max="100" value="50" />
@@ -183,7 +206,6 @@
       </div>
 
       <div id="perspectiveControls" style="display:none">
-        <h2>Perspective</h2>
         <label class="control">
           <span class="row"><span class="name">Depth</span><span class="val" id="vDepth">50</span></span>
           <input type="range" id="perspDepth" min="0" max="100" value="50" />
@@ -203,7 +225,6 @@
       </div>
 
       <div id="gestureControls" style="display:none">
-        <h2>Gesture</h2>
         <label class="control">
           <span class="row"><span class="name">Scale</span><span class="val" id="vGestScale">50</span></span>
           <input type="range" id="gestScale" min="0" max="100" value="50" />
@@ -242,6 +263,36 @@
         </label>
       </div>
 
+      <div class="h2-row">
+        <h2>Segments</h2>
+        <label class="control checkbox-row">
+          <input type="checkbox" id="segEnabled" />
+          Enable
+        </label>
+      </div>
+      <div id="segControls" style="display:none">
+        <div class="control">
+          <span class="row"><span class="name">Color</span></span>
+          <div class="color-row">
+            <input type="color" id="segHex" value="#EDECE8" />
+            <input type="text" id="segText" value="#EDECE8" maxlength="7" />
+          </div>
+          <div class="swatch-grid" id="segSwatches"></div>
+        </div>
+        <label class="control">
+          <span class="row"><span class="name">Density</span><span class="val" id="vSegDensity">50</span></span>
+          <input type="range" id="segDensity" min="0" max="100" value="50" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Size</span><span class="val" id="vSegSize">50</span></span>
+          <input type="range" id="segSize" min="0" max="100" value="50" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Speed</span><span class="val" id="vSegSpeed">50</span></span>
+          <input type="range" id="segSpeed" min="0" max="100" value="50" />
+        </label>
+      </div>
+
       <h2>Timing</h2>
       <label class="control">
         <span class="row"><span class="name">Total frames</span><span class="val" id="vEmergeFr">120</span></span>
@@ -261,19 +312,21 @@
     </aside>
 
     <div class="preview-wrap" style="order: 2">
-      <div class="canvas-shell">
-        <canvas id="c" width="2400" height="1260"></canvas>
-      </div>
-      <div class="timeline">
-        <input type="range" id="scrub" min="0" max="0" value="0" />
-      </div>
-      <div class="playbar">
-        <button type="button" class="primary" id="playToggle" title="Play / Pause">&#9654;</button>
-        <span id="frameLabel" style="flex:1">—</span>
-        <label class="control checkbox-row" style="margin:0">
-          <input type="checkbox" id="loop" checked />
-          Loop
-        </label>
+      <div class="canvas-block">
+        <div class="canvas-shell">
+          <canvas id="c" width="2400" height="1260"></canvas>
+        </div>
+        <div class="timeline">
+          <input type="range" id="scrub" min="0" max="0" value="0" />
+        </div>
+        <div class="playbar">
+          <button type="button" class="primary" id="playToggle" title="Play / Pause">&#9654;</button>
+          <span id="frameLabel" style="flex:1">—</span>
+          <label class="control checkbox-row" style="margin:0">
+            <input type="checkbox" id="loop" checked />
+            Loop
+          </label>
+        </div>
       </div>
     </div>
 

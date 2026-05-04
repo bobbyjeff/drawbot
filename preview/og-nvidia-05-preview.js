@@ -54,6 +54,51 @@
     };
   }
 
+  /* ─── shared segment helpers ─── */
+  function makeSegs(seed, count) {
+    const rng = mulberry32(seed);
+    return Array.from({ length: count }, () => ({
+      pos:   rng(),
+      width: [0.03, 0.08, 0.18][Math.floor(rng() * 3)] + rng() * 0.04,
+      drift: (0.2 + rng() * 0.8) * (rng() > 0.5 ? 1 : -1),
+      phase: rng(),
+    }));
+  }
+
+  /* Continuous time base for segments — independent of frame rate */
+  function segNow(p) {
+    /* Normalized so speed=1 means one cycle per animation loop duration */
+    return (performance.now() / 1000) * (p.fps / p.emergeFr);
+  }
+
+  /* drawFn(s0, s1, color) — s0/s1 in [0,1] along the stroke */
+  function applySegs(segs, _gp, p, drawFn) {
+    if (!segs.length) return;
+    const sizeScale  = lerp(0.1, 2.0, p.segSize);
+    const speedScale = lerp(0.1, 2.0, p.segSpeed);
+    const count      = Math.max(1, Math.round(segs.length * clamp(lerp(0.15, 1, p.segDensity), 0.01, 1)));
+    const MIN_GAP    = 0.03;
+    const t          = segNow(p);
+    const cr = parseInt(p.segColor.slice(1, 3), 16);
+    const cg = parseInt(p.segColor.slice(3, 5), 16);
+    const cb = parseInt(p.segColor.slice(5, 7), 16);
+    const color = `rgb(${cr},${cg},${cb})`;
+    const visible = segs.slice(0, count)
+      .map(cs => {
+        const pos = ((cs.pos + (t + cs.phase) * cs.drift * speedScale) % 1 + 1) % 1;
+        const hw  = cs.width * sizeScale * 0.5;
+        return { s0: clamp(pos - hw, 0, 1), s1: clamp(pos + hw, 0, 1) };
+      })
+      .filter(c => c.s1 > c.s0)
+      .sort((a, b) => a.s0 - b.s0);
+    for (let ci = 0; ci < visible.length; ci++) {
+      const cs   = visible[ci];
+      const prev = ci > 0 ? visible[ci - 1] : null;
+      if (prev && cs.s0 < prev.s1 + MIN_GAP) continue;
+      drawFn(cs.s0, cs.s1, color);
+    }
+  }
+
   /* ─── active preset ─── */
   let activePreset = "parametric";
 
@@ -151,44 +196,51 @@
       const gp = t / tot;
 
       for (let i = 0; i < N; i++) {
-        const line = LINES[i];
-        drawLineSegment(line, 0, 1, p.strokeColor, p.strokeW);
+        drawLineSegment(LINES[i], 0, 1, p.strokeColor, p.strokeW);
+      }
 
-        const colorSegs = COLOR_SEGS[i]
-          .map(cs => {
-            const pos = (cs.pos + (gp + cs.phase) * cs.drift) % COLOR_ZONE;
-            return {
-              s0: clamp(pos - cs.width / 2, 0, COLOR_ZONE),
-              s1: clamp(pos + cs.width / 2, 0, COLOR_ZONE),
-            };
-          })
-          .filter(c => c.s1 > c.s0)
-          .sort((a, b) => a.s0 - b.s0);
+      if (p.segEnabled) {
+        const sizeScale  = lerp(0.1, 2.0, p.segSize);
+        const speedScale = lerp(0.1, 2.0, p.segSpeed);
+        const densCount  = Math.max(1, Math.round(N * clamp(lerp(0.15, 1, p.segDensity), 0, 1)));
+        const MIN_GAP    = 0.04;
+        const segT       = segNow(p);
+        const gr = parseInt(p.strokeColor.slice(1, 3), 16);
+        const gg = parseInt(p.strokeColor.slice(3, 5), 16);
+        const gb = parseInt(p.strokeColor.slice(5, 7), 16);
+        const cr = parseInt(p.segColor.slice(1, 3), 16);
+        const cg = parseInt(p.segColor.slice(3, 5), 16);
+        const cb = parseInt(p.segColor.slice(5, 7), 16);
 
-        const MIN_GAP = 0.04;
-        const gr = parseInt(p.strokeColor.slice(1,3),16);
-        const gg = parseInt(p.strokeColor.slice(3,5),16);
-        const gb = parseInt(p.strokeColor.slice(5,7),16);
+        for (let i = 0; i < densCount; i++) {
+          const line = LINES[i];
+          const colorSegs = COLOR_SEGS[i]
+            .map(cs => {
+              const pos = (cs.pos + (segT + cs.phase) * cs.drift * speedScale) % COLOR_ZONE;
+              const hw  = cs.width * sizeScale * 0.5;
+              return {
+                s0: clamp(pos - hw, 0, COLOR_ZONE),
+                s1: clamp(pos + hw, 0, COLOR_ZONE),
+              };
+            })
+            .filter(c => c.s1 > c.s0)
+            .sort((a, b) => a.s0 - b.s0);
 
-        for (let ci = 0; ci < colorSegs.length; ci++) {
-          const cs = colorSegs[ci];
-          const prev = ci > 0 ? colorSegs[ci - 1] : null;
-          if (prev && cs.s0 < prev.s1 + MIN_GAP) continue;
+          for (let ci = 0; ci < colorSegs.length; ci++) {
+            const cs   = colorSegs[ci];
+            const prev = ci > 0 ? colorSegs[ci - 1] : null;
+            if (prev && cs.s0 < prev.s1 + MIN_GAP) continue;
 
-          const cr = parseInt(p.segColor.slice(1,3),16);
-          const cg = parseInt(p.segColor.slice(3,5),16);
-          const cb = parseInt(p.segColor.slice(5,7),16);
+            const mid = (cs.s0 + cs.s1) / 2;
+            const fadeBlend = cs.s1 > COLOR_FADE_START
+              ? clamp((mid - COLOR_FADE_START) / (COLOR_ZONE - COLOR_FADE_START), 0, 1)
+              : 0;
 
-          const mid = (cs.s0 + cs.s1) / 2;
-          const fadeBlend = cs.s1 > COLOR_FADE_START
-            ? clamp((mid - COLOR_FADE_START) / (COLOR_ZONE - COLOR_FADE_START), 0, 1)
-            : 0;
-
-          const br = Math.round(lerp(cr, gr, fadeBlend));
-          const bg2 = Math.round(lerp(cg, gg, fadeBlend));
-          const bb = Math.round(lerp(cb, gb, fadeBlend));
-
-          drawLineSegment(line, cs.s0, cs.s1, `rgb(${br},${bg2},${bb})`, p.strokeW);
+            const br  = Math.round(lerp(cr, gr, fadeBlend));
+            const bg2 = Math.round(lerp(cg, gg, fadeBlend));
+            const bb  = Math.round(lerp(cb, gb, fadeBlend));
+            drawLineSegment(line, cs.s0, cs.s1, `rgb(${br},${bg2},${bb})`, p.strokeW);
+          }
         }
       }
     }
@@ -257,6 +309,8 @@
         phase: colorRng(),
       }));
     });
+
+    const SPEED_SEG_DESCS = Array.from({ length: N }, (_, i) => makeSegs(0xABCD0000 + i * 7, 3));
 
     function render(fi, p) {
       ctx.fillStyle = p.bg;
@@ -380,6 +434,17 @@
             }
           }
         }
+
+        if (p.segEnabled) {
+          applySegs(SPEED_SEG_DESCS[i], gp, p, (s0, s1, color) => {
+            const x0 = lineLeft + s0 * SPAN;
+            const x1 = lineLeft + s1 * SPAN;
+            const segMidX = (x0 + x1) / 2;
+            const tPersp  = clamp((segMidX - LINE_LEFT) / SPAN, 0, 1);
+            const yAt     = lerp(sl.sy, perspConvergeY, tPersp * perspVal);
+            drawHLine(yAt, x0, x1, color, p.strokeW);
+          });
+        }
       }
     }
 
@@ -393,6 +458,8 @@
     const sv = VIEW_SCALE;
     const VW = RIGHT_X;
     const VH = H / VIEW_SCALE;
+
+    const PERSP_SEGS = Array.from({ length: 30 }, (_, i) => makeSegs(0xFEED0000 + i * 17, 2));
 
     function drawRoundedRect(cx, cy, hw, hh, r, strokeColor, lineWidth) {
       const x0 = cx - hw, y0 = cy - hh, x1 = cx + hw, y1 = cy + hh;
@@ -471,6 +538,18 @@
 
         const lw = p.strokeW / sv;
         drawRoundedRect(cx, cy, hw, hh, cornerR, p.strokeColor, lw);
+
+        if (p.segEnabled) {
+          applySegs(PERSP_SEGS[r % PERSP_SEGS.length], gp, p, (s0, s1, color) => {
+            const perimCanvas = 4 * (hw + hh) * sv;
+            const segLen = (s1 - s0) * perimCanvas;
+            ctx.setLineDash([segLen, Math.max(perimCanvas - segLen, 0)]);
+            ctx.lineDashOffset = -s0 * perimCanvas;
+            drawRoundedRect(cx, cy, hw, hh, cornerR, color, lw);
+          });
+          ctx.setLineDash([]);
+          ctx.lineDashOffset = 0;
+        }
       }
 
       const lw = p.strokeW / sv;
@@ -509,6 +588,8 @@
     const sv = VIEW_SCALE;
     const VW = RIGHT_X;
     const VH = H / VIEW_SCALE;
+
+    const GESTURE_SEGS = makeSegs(0xDEAD0000, 3);
 
     function render(fi, p) {
       ctx.fillStyle = p.bg;
@@ -612,6 +693,22 @@
           idx = nextIdx;
           if (idx >= points.length - 1) break;
         }
+      }
+
+      if (p.segEnabled && fragVal < 0.01) {
+        applySegs(GESTURE_SEGS, gp, p, (s0, s1, color) => {
+          const i0 = Math.floor(s0 * (points.length - 1));
+          const i1 = Math.ceil(s1 * (points.length - 1));
+          if (i1 <= i0) return;
+          ctx.strokeStyle = color;
+          ctx.lineWidth   = p.strokeW;
+          ctx.lineCap     = "round";
+          ctx.lineJoin    = "round";
+          ctx.beginPath();
+          ctx.moveTo(points[i0].x * sv, points[i0].y * sv);
+          for (let si = i0 + 1; si <= i1; si++) ctx.lineTo(points[si].x * sv, points[si].y * sv);
+          ctx.stroke();
+        });
       }
     }
 
@@ -735,13 +832,16 @@
     const SEG_LEFT_SCALE  = 0.50;               /* left-edge multiplier */
     const SEG_RIGHT_SCALE = 1.00;               /* right-edge multiplier */
 
+    const WIND_BAND_SEGS = makeSegs(0xF00D0000, 4);
+
     function smoothstep(lo, hi, x) {
       const t = clamp((x - lo) / (hi - lo), 0, 1);
       return t * t * (3 - 2 * t);
     }
 
     function render(fi, p) {
-      void fi;
+      const tot = p.emergeFr;
+      const gp  = ((fi % tot) + tot) % tot / tot;
       ctx.fillStyle = p.bg;
       ctx.fillRect(0, 0, W, H);
       ctx.strokeStyle = p.strokeColor;
@@ -816,6 +916,73 @@
           ctx.stroke();
         }
       }
+
+      if (p.segEnabled) {
+        const sizeScale  = lerp(0.1, 2.0, p.segSize);
+        const speedScale = lerp(0.1, 2.0, p.segSpeed);
+        const count      = Math.max(1, Math.round(WIND_BAND_SEGS.length * clamp(lerp(0.15, 1, p.segDensity), 0.01, 1)));
+        const cr = parseInt(p.segColor.slice(1, 3), 16);
+        const cg = parseInt(p.segColor.slice(3, 5), 16);
+        const cb = parseInt(p.segColor.slice(5, 7), 16);
+        const segColorStr = `rgb(${cr},${cg},${cb})`;
+
+        const segT2 = segNow(p);
+        const bands = WIND_BAND_SEGS.slice(0, count).map(cs => {
+          const pos = ((cs.pos + (segT2 + cs.phase) * cs.drift * speedScale) % 1 + 1) % 1;
+          const hw  = cs.width * sizeScale * 0.5;
+          return { lo: clamp(pos - hw, 0, 1), hi: clamp(pos + hw, 0, 1) };
+        }).filter(b => b.hi > b.lo);
+
+        if (bands.length) {
+          ctx.strokeStyle = segColorStr;
+          ctx.lineWidth   = p.strokeW;
+          ctx.lineJoin    = "round";
+          ctx.lineCap     = "round";
+
+          for (let iy = 0; iy < WIND_CY; iy++) {
+            for (let ix = 0; ix < WIND_CX; ix++) {
+              const ctrX = gx[ix];
+              const ctrY = ctrYAt(ix, iy);
+              if (isNaN(ctrY)) continue;
+              const fx2 = clamp((ctrX - WIND_IN_LEFT) * invSXG, 0, 1);
+              if (!bands.some(b => fx2 >= b.lo && fx2 <= b.hi)) continue;
+
+              const uAngle2 = clamp(fx2, 0, 1);
+              const angle2  = -ANGLE_MAX_RAD * Math.pow(uAngle2, ANGLE_EXP);
+              const wx2     = Math.cos(angle2);
+              const wy2     = Math.sin(angle2);
+
+              const leftB2  = ix > 0         ? (gx[ix - 1] + gx[ix]) * 0.5 : WIND_IN_LEFT;
+              const rightB2 = ix < WIND_CX-1 ? (gx[ix] + gx[ix + 1]) * 0.5 : WIND_IN_RIGHT;
+              const n2      = colN[ix];
+              const spacing2 = n2 > 1 ? spanYG / (n2 - 1) : spanYG;
+              const yTop2   = ctrY - spacing2 * 0.5;
+              const yBot2   = ctrY + spacing2 * 0.5;
+
+              let halfUCell2 = Infinity;
+              if (Math.abs(wx2) > eps)
+                halfUCell2 = Math.min(halfUCell2, Math.min(rightB2 - ctrX, ctrX - leftB2) / Math.abs(wx2));
+              if (Math.abs(wy2) > eps)
+                halfUCell2 = Math.min(halfUCell2, Math.min(yBot2 - ctrY, ctrY - yTop2) / Math.abs(wy2));
+              if (!Number.isFinite(halfUCell2)) continue;
+
+              const capPad2   = (p.strokeW * 0.5) / Math.max(sv, 1e-9);
+              const halfUMax2 = Math.max(0, halfUCell2 - capPad2 * 1.1);
+              const fy2       = clamp((ctrY - WIND_IN_TOP) * invSYG, 0, 1);
+              const uRowRaw2  = fx2 * 0.55 + (1 - fy2) * 0.45;
+              const uRamp2    = Math.pow(clamp(uRowRaw2, 0, 1), SEG_LEN_EXP);
+              const colScale2 = SEG_LEFT_SCALE + (SEG_RIGHT_SCALE - SEG_LEFT_SCALE) * fx2;
+              const halfTarget2 = (SEG_HALF_MIN + (SEG_HALF_MAX - SEG_HALF_MIN) * uRamp2) * colScale2;
+              const halfU2    = Math.min(halfTarget2, halfUMax2);
+
+              ctx.beginPath();
+              ctx.moveTo(pixHalf((ctrX - halfU2 * wx2) * sv), pixHalf((ctrY - halfU2 * wy2) * sv));
+              ctx.lineTo(pixHalf((ctrX + halfU2 * wx2) * sv), pixHalf((ctrY + halfU2 * wy2) * sv));
+              ctx.stroke();
+            }
+          }
+        }
+      }
     }
 
     return { render };
@@ -823,83 +990,113 @@
 
   /* ══════════════════════════════════════════
      PLANES — reference: images/public/planes.svg
-     Each plane moves LEFT → RIGHT across the canvas.
-     It enters as a wide X-shape from the left, narrows to a single vertical line
-     as it passes canvas center (straight-on view), then widens again exiting right.
-     Six planes staggered so the composition always looks like the SVG.
+     All planes share the same center axis (canvas mid-x).
+     Each plane expands from hw=0 (a vertical center line, far away / head-on)
+     to hw=MAX_HW (nearly full canvas width, close / oblique).
+     Six planes staggered so the composition always shows the full depth range.
      ══════════════════════════════════════════ */
   const planes = (function () {
     const sv   = VIEW_SCALE;
     const VH   = H / VIEW_SCALE;
 
-    /* Scale SVG viewBox (1803.43 × 948.28) → canvas (1200 × 630) */
+    /* Scale SVG viewBox (1803.43 × 948.28) → canvas layout space (RIGHT_X × VH) */
     const SVG_W  = 1803.43;
     const SVG_H  = 948.28;
-    const scaleX = RIGHT_X / SVG_W;           /* 0.6654 */
-    const scaleY = VH      / SVG_H;           /* 0.6644 */
+    const scaleX = RIGHT_X / SVG_W;
+    const scaleY = VH      / SVG_H;
 
-    const TOP    = 2.19  * scaleY;            /* 1.45 px — SVG top margin */
-    const BOT    = 946.12 * scaleY;           /* 628.6 px — SVG bottom margin */
-    const CX     = 901.71 * scaleX;           /* 599.7 ≈ 600 — canvas center */
+    const TOP    = 2.19   * scaleY;   /* ≈1.45 layout-px — top margin matches SVG */
+    const BOT    = 946.12 * scaleY;   /* ≈628.6 layout-px — bottom margin matches SVG */
+    const CX     = 901.71 * scaleX;   /* ≈599.6 layout-px — all planes share this center */
+    const MAX_HW = 900.715 * scaleX;  /* ≈599.0 layout-px — widest plane nearly fills canvas */
 
-    /*
-     * MAX_HW: the widest X-shape spans from x≈1 to x≈1802 in SVG.
-     * Half-width = 900.715 * scaleX ≈ 599 — almost exactly CX.
-     */
-    const MAX_HW     = 900.715 * scaleX;
     const NUM_PLANES = 6;
+    const FADE_IN    = 0.08;
+    const FADE_OUT   = 0.12;
 
-    /*
-     * Each plane travels left→right. Its crossing-point x moves over TRAVEL pixels.
-     * TRAVEL = 2·CX so:
-     *   t=0  → xCross=0    (entering left, right vert at CX, left vert off-screen)
-     *   t=0.5 → xCross=CX  (straight-on, appears as vertical line at canvas center)
-     *   t=1  → xCross=1200 (exiting right, left vert at CX, right vert off-screen)
-     */
-    const TRAVEL = 2 * CX;
+    const PLANES_PATH_SEGS = Array.from({ length: NUM_PLANES }, (_, i) => makeSegs(0xB00B0000 + i * 17, 3));
+
+    function drawPlane(cxPx, hw, tyPx, byPx) {
+      const rx = cxPx + hw;
+      const lx = cxPx - hw;
+      ctx.beginPath();
+      if (hw < sv) {
+        /* Narrow enough to read as a single vertical line */
+        ctx.moveTo(cxPx, tyPx);
+        ctx.lineTo(cxPx, byPx);
+      } else {
+        /* SVG path: (rx,bot)→(rx,top)→(lx,bot)→(lx,top)→(rx,bot) */
+        ctx.moveTo(rx, byPx);
+        ctx.lineTo(rx, tyPx);
+        ctx.lineTo(lx, byPx);
+        ctx.lineTo(lx, tyPx);
+        ctx.lineTo(rx, byPx);
+      }
+      ctx.stroke();
+    }
 
     function render(fi, p) {
       ctx.fillStyle = p.bg;
       ctx.fillRect(0, 0, W, H);
 
-      const tot = p.emergeFr;
-      const t   = ((fi % tot) + tot) % tot;
-      const gp  = t / tot;
+      const tot  = p.emergeFr;
+      const t    = ((fi % tot) + tot) % tot;
+      const gp   = t / tot;
 
-      ctx.strokeStyle = p.strokeColor;
-      ctx.lineWidth   = p.strokeW;
-      ctx.lineCap     = "round";
-      ctx.lineJoin    = "round";
+      const cxPx = CX  * sv;
+      const tyPx = TOP * sv;
+      const byPx = BOT * sv;
+      const vLen = byPx - tyPx;
 
-      const ty = TOP * sv;
-      const by = BOT * sv;
+      ctx.lineWidth = p.strokeW;
+      ctx.lineCap   = "round";
+      ctx.lineJoin  = "round";
 
       for (let i = 0; i < NUM_PLANES; i++) {
-        const phase  = (gp + i / NUM_PLANES) % 1;
+        /* phase 0 = narrow/far, phase 1 = wide/close (then wraps back) */
+        const phase = (gp + i / NUM_PLANES) % 1;
+        const hw    = phase * MAX_HW * sv;   /* canvas px */
 
-        /* hw: MAX at phase=0 (entering left), 0 at phase=0.5 (straight-on), MAX at phase=1 */
-        const hw     = Math.abs(Math.cos(phase * Math.PI)) * MAX_HW;
+        /* Smooth fade in/out at the wrap boundary */
+        const raw   = phase < FADE_IN
+          ? phase / FADE_IN
+          : phase > 1 - FADE_OUT
+            ? (1 - phase) / FADE_OUT
+            : 1;
+        const alpha = raw * raw * (3 - 2 * raw);  /* smoothstep */
 
-        /* xCross: crossing point moves from 0 → TRAVEL across the canvas */
-        const xCross = phase * TRAVEL;
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = p.strokeColor;
+        drawPlane(cxPx, hw, tyPx, byPx);
 
-        const lx = (xCross - hw) * sv;
-        const rx = (xCross + hw) * sv;
-
-        ctx.beginPath();
-        if (hw < 1) {
-          ctx.moveTo(xCross * sv, ty);
-          ctx.lineTo(xCross * sv, by);
-        } else {
-          /* SVG path structure: RX,BOT → RX,TOP → LX,BOT → LX,TOP → RX,BOT */
-          ctx.moveTo(rx, by);
-          ctx.lineTo(rx, ty);
-          ctx.lineTo(lx, by);
-          ctx.lineTo(lx, ty);
-          ctx.lineTo(rx, by);
+        if (p.segEnabled && hw >= sv) {
+          const rx      = cxPx + hw;
+          const lx      = cxPx - hw;
+          const dLen    = Math.sqrt((rx - lx) ** 2 + vLen ** 2);
+          const perim   = 2 * vLen + 2 * dLen;
+          applySegs(PLANES_PATH_SEGS[i], null, p, (s0, s1, color) => {
+            const segLen = (s1 - s0) * perim;
+            ctx.setLineDash([segLen, Math.max(perim - segLen, 0)]);
+            ctx.lineDashOffset = -s0 * perim;
+            ctx.strokeStyle    = color;
+            ctx.lineWidth      = p.strokeW;
+            ctx.lineCap        = "round";
+            ctx.beginPath();
+            ctx.moveTo(rx, byPx);
+            ctx.lineTo(rx, tyPx);
+            ctx.lineTo(lx, byPx);
+            ctx.lineTo(lx, tyPx);
+            ctx.lineTo(rx, byPx);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+          ctx.lineDashOffset = 0;
+          ctx.strokeStyle    = p.strokeColor;
+          ctx.lineWidth      = p.strokeW;
         }
-        ctx.stroke();
       }
+
+      ctx.globalAlpha = 1;
     }
 
     return { render };
@@ -938,6 +1135,8 @@
     const FADE_OUT = 0.06;
 
     const CYCLE_FRAMES = 270;  /* ~9s at 30fps */
+
+    const SPHERE_SEGS = Array.from({ length: 16 }, (_, i) => makeSegs(0xC0DE0000 + i * 13, 2));
 
     function ringAlpha(phase) {
       let a;
@@ -999,6 +1198,17 @@
         ctx.beginPath();
         ctx.ellipse(0, yCtr * sv, Math.max(rx * sv, 0.5), Math.max(ry * sv, 0.5), 0, 0, Math.PI * 2);
         ctx.stroke();
+
+        if (p.segEnabled) {
+          applySegs(SPHERE_SEGS[i % SPHERE_SEGS.length], rawPhase, p, (s0, s1, color) => {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(0, yCtr * sv, Math.max(rx * sv, 0.5), Math.max(ry * sv, 0.5), 0,
+              s0 * Math.PI * 2, s1 * Math.PI * 2);
+            ctx.stroke();
+          });
+          ctx.strokeStyle = p.strokeColor;
+        }
       }
 
       ctx.restore();
@@ -1053,6 +1263,9 @@
     const SEGS = 400;
     const T    = 900;   /* slightly slower; visual loop ≈ T/12 = 75 frames */
 
+    const PARAM_SEGS_A = Array.from({ length: 9 }, (_, i) => makeSegs(0xAAAA0000 + i * 23, 2));
+    const PARAM_SEGS_B = makeSegs(0xBBBB0000, 2);
+
     function render(fi, p) {
       /* N_A driven by the Curves slider: visible total = N_A + N_B = N_A + 1 */
       const N_A = Math.max(1, parseInt(document.getElementById('paramCurves')?.value ?? '3', 10) - 1);
@@ -1096,6 +1309,54 @@
       }
 
       ctx.setLineDash([]);
+
+      if (p.segEnabled) {
+        const segGp = (fi % T) / T;
+
+        /* Family A segments */
+        for (let k = 0; k < N_A; k++) {
+          const φ = k * Math.PI * 2 / N_A;
+          applySegs(PARAM_SEGS_A[k % PARAM_SEGS_A.length], segGp, p, (s0, s1, color) => {
+            const i0 = Math.floor(s0 * SEGS);
+            const i1 = Math.ceil(s1 * SEGS);
+            if (i1 <= i0) return;
+            ctx.strokeStyle = color;
+            ctx.lineWidth   = p.strokeW;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+            ctx.beginPath();
+            for (let j = i0; j <= i1; j++) {
+              const t  = j / SEGS * Math.PI * 2;
+              const sx = (CX + Rx * Math.sin(B * t + δ + φ)) * sv;
+              const sy = (CY - Ry * Math.sin(A * t)) * sv;
+              j === i0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+          });
+        }
+
+        /* Family B segments */
+        {
+          const ψ = 0;
+          applySegs(PARAM_SEGS_B, segGp, p, (s0, s1, color) => {
+            const i0 = Math.floor(s0 * SEGS);
+            const i1 = Math.ceil(s1 * SEGS);
+            if (i1 <= i0) return;
+            ctx.strokeStyle = color;
+            ctx.lineWidth   = p.strokeW;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+            ctx.beginPath();
+            for (let j = i0; j <= i1; j++) {
+              const t  = j / SEGS * Math.PI * 2;
+              const sx = (CX + Rx * Math.sin(B * t + δ)) * sv;
+              const sy = (CY - Ry * Math.sin(A * t + ψ)) * sv;
+              j === i0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+          });
+        }
+      }
     }
 
     return { render };
@@ -1113,6 +1374,10 @@
       strokeW: parseFloat(el("strokeW").value) * VIEW_SCALE,
       fps: parseInt(el("fps").value, 10),
       emergeFr: parseInt(el("emergeFr").value, 10),
+      segEnabled: el("segEnabled").checked,
+      segDensity: parseInt(el("segDensity").value, 10) / 100,
+      segSize:    parseInt(el("segSize").value, 10) / 100,
+      segSpeed:   parseInt(el("segSpeed").value, 10) / 100,
     };
   }
 
@@ -1176,6 +1441,7 @@
   let frameIndex = 0;
   let lastT = 0;
   let raf = null;
+  let segRaf = null;
 
   const el = id => document.getElementById(id);
 
@@ -1229,6 +1495,9 @@
       el("vGestFrag").textContent = el("gestFrag").value;
       el("vGestHeight").textContent = el("gestHeight").value;
     }
+    el("vSegDensity").textContent = el("segDensity").value;
+    el("vSegSize").textContent    = el("segSize").value;
+    el("vSegSpeed").textContent   = el("segSpeed").value;
   }
 
   function updatePresetUI() {
@@ -1247,6 +1516,21 @@
     el("frameLabel").textContent = `${frameIndex % tot} / ${tot - 1}`;
   }
 
+  function stopSegLoop() {
+    if (segRaf) { cancelAnimationFrame(segRaf); segRaf = null; }
+  }
+
+  function startSegLoop() {
+    if (segRaf || playing) return;
+    function loop() {
+      if (playing || !el("segEnabled").checked) { segRaf = null; return; }
+      const p = readParams();
+      renderFrame(frameIndex, p);
+      segRaf = requestAnimationFrame(loop);
+    }
+    segRaf = requestAnimationFrame(loop);
+  }
+
   function tick(now) {
     if (!playing) return;
     const p = readParams();
@@ -1260,16 +1544,26 @@
         setPlaying(false);
         return;
       }
-      paint();
+      /* Update scrub/label only when frame actually advances */
+      el("scrub").value = String(frameIndex % tot);
+      el("frameLabel").textContent = `${frameIndex % tot} / ${tot - 1}`;
     }
+    /* Always repaint at RAF rate — keeps segments silky even at low FPS settings */
+    renderFrame(frameIndex, p);
     raf = requestAnimationFrame(tick);
   }
 
   function setPlaying(val) {
     playing = val;
     el("playToggle").innerHTML = playing ? '&#9646;&#9646;' : '&#9654;';
-    if (playing) { lastT = performance.now(); raf = requestAnimationFrame(tick); }
-    else if (raf) cancelAnimationFrame(raf);
+    if (playing) {
+      stopSegLoop();
+      lastT = performance.now();
+      raf = requestAnimationFrame(tick);
+    } else {
+      if (raf) cancelAnimationFrame(raf);
+      if (el("segEnabled").checked) startSegLoop();
+    }
   }
 
   el("playToggle").addEventListener("click", () => setPlaying(!playing));
@@ -1281,6 +1575,12 @@
 
   document.querySelectorAll(".controls input").forEach(inp => {
     inp.addEventListener("input", () => { updateLabels(); paint(); });
+  });
+
+  el("segEnabled").addEventListener("input", () => {
+    el("segControls").style.display = el("segEnabled").checked ? "" : "none";
+    if (el("segEnabled").checked && !playing) startSegLoop();
+    else stopSegLoop();
   });
 
 
@@ -1634,6 +1934,7 @@
 
   buildSwatches('bgSwatches', 'bgHex', 'bgText');
   buildSwatches('fgSwatches', 'fgHex', 'fgText');
+  buildSwatches('segSwatches', 'segHex', 'segText');
 
   /* ── size toggle buttons ── */
   function setSizeMode(mode) {
@@ -1647,6 +1948,74 @@
   el('sizeOG').addEventListener('click',   () => setSizeMode('og'));
   el('size1080').addEventListener('click', () => setSizeMode('1080p'));
   el('size4k').addEventListener('click',   () => setSizeMode('4k'));
+
+  /* ── R key: randomize colors + form params ── */
+  function paletteContrast(hex1, hex2) {
+    function lum(hex) {
+      const r = parseInt(hex.slice(1,3),16)/255;
+      const g = parseInt(hex.slice(3,5),16)/255;
+      const b = parseInt(hex.slice(5,7),16)/255;
+      const lin = c => c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4);
+      return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+    }
+    const l1 = lum(hex1), l2 = lum(hex2);
+    const hi = Math.max(l1,l2), lo = Math.min(l1,l2);
+    return (hi+0.05)/(lo+0.05);
+  }
+
+  function randomize() {
+    /* Pick a high-contrast bg+fg pair from the brand palette */
+    const MIN_CONTRAST = 4.5;
+    let bg, fg, attempts = 0;
+    do {
+      bg = BRAND_PALETTE[Math.floor(Math.random() * BRAND_PALETTE.length)];
+      fg = BRAND_PALETTE[Math.floor(Math.random() * BRAND_PALETTE.length)];
+      attempts++;
+    } while (paletteContrast(bg, fg) < MIN_CONTRAST && attempts < 400);
+
+    el('bgHex').value = bg;  el('bgText').value = bg.toUpperCase();
+    el('fgHex').value = fg;  el('fgText').value = fg.toUpperCase();
+
+    /* Randomize form params for the active preset */
+    function rnd(id, lo, hi) { el(id).value = lo + Math.floor(Math.random() * (hi - lo + 1)); }
+
+    if (activePreset === 'parametric') {
+      rnd('paramCurves', 2, 9);
+    } else if (activePreset === 'sphere') {
+      rnd('sphereRings', 3, 16);
+    } else if (activePreset === 'speed') {
+      rnd('speedSpace',    0, 100);
+      rnd('speedVelocity', 0, 100);
+      rnd('speedColor',    0, 100);
+      rnd('speedScale',   15,  85);
+      rnd('speedPosition',15,  85);
+      rnd('speedDither',   0,  60);
+      rnd('speedPersp',    0,  80);
+    } else if (activePreset === 'perspective') {
+      rnd('perspDepth',    10, 90);
+      rnd('perspAngle',     0, 100);
+      rnd('perspPosition', 15,  85);
+      rnd('perspShape',     0, 100);
+    } else if (activePreset === 'gesture') {
+      rnd('gestScale',    20,  80);
+      rnd('gestAmp',      10,  90);
+      rnd('gestWaves',    10,  90);
+      rnd('gestDamp',     10,  80);
+      rnd('gestSkew',     20,  80);
+      rnd('gestRhythm',    0,  80);
+      rnd('gestPos',      15,  85);
+      rnd('gestFrag',      0,  50);
+      rnd('gestHeight',   15,  85);
+    }
+
+    updateLabels();
+    paint();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'r' || e.key === 'R') randomize();
+  });
 
   const p0 = readParams();
   if (activePreset === "converge") {
