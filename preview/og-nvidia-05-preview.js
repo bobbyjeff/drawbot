@@ -1363,7 +1363,195 @@
   })();
 
 
-  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric };
+  /* ══════════════════════════════════════════
+     TREE MAP preset
+     ══════════════════════════════════════════ */
+  const treemap = (function () {
+    let _cache = null;
+
+    /* ── color helpers ── */
+    function hexToRgb(hex) {
+      return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+    }
+
+    function blendHex(a, b, t) {
+      const [ar,ag,ab_] = hexToRgb(a);
+      const [br,bg_,bb] = hexToRgb(b);
+      const r = Math.round(ar + (br-ar)*t).toString(16).padStart(2,'0');
+      const g = Math.round(ag + (bg_-ag)*t).toString(16).padStart(2,'0');
+      const bv = Math.round(ab_ + (bb-ab_)*t).toString(16).padStart(2,'0');
+      return '#' + r + g + bv;
+    }
+
+    function rgbDist(a, b) {
+      const [ar,ag,ab_] = hexToRgb(a);
+      const [br,bg_,bb] = hexToRgb(b);
+      return Math.sqrt((ar-br)**2 + (ag-bg_)**2 + (ab_-bb)**2);
+    }
+
+    /* Brand saturated row — used to pick accent colour */
+    const BRAND_SAT = [
+      '#E03E0A','#D45050','#A0703C','#9A920A','#18A050',
+      '#04A098','#1858D8','#5058C8','#B030A8','#CC3838',
+    ];
+
+    /** Returns the brand-saturated entry most perceptually distant from both bg and fg. */
+    function pickAccent(bgHex, fgHex) {
+      let best = BRAND_SAT[0], bestScore = -1;
+      for (const c of BRAND_SAT) {
+        const score = rgbDist(c, bgHex) + rgbDist(c, fgHex);
+        if (score > bestScore) { bestScore = score; best = c; }
+      }
+      return best;
+    }
+
+    /**
+     * Build the fill palette.
+     *   colorVal = 0      → 5 monochromatic tints (bg → stroke)
+     *   colorVal > 0.33   → + neutral 1 (#8B8B82, mid-grey)
+     *   colorVal > 0.66   → + neutral 2 (#C4C4BC, light-grey)
+     *   colorVal > 0.88   → + 1 saturated accent (computed from palette)
+     */
+    function buildPalette(bgHex, fgHex, colorVal) {
+      const palette = [
+        bgHex,
+        blendHex(bgHex, fgHex, 0.2),
+        blendHex(bgHex, fgHex, 0.5),
+        blendHex(bgHex, fgHex, 0.8),
+        fgHex,
+      ];
+      if (colorVal > 1/3) palette.push('#8B8B82');
+      if (colorVal > 2/3) palette.push('#C4C4BC');
+      if (colorVal > 0.88) palette.push(pickAccent(bgHex, fgHex));
+      return palette;
+    }
+
+    /* ── BSP builder ── */
+    const PHI = 0.6180339887;   /* golden ratio */
+
+    /**
+     * Recursively partition the canvas into leaf rects.
+     *
+     * Complexity  → maxDepth (2–18).  Higher = far more subdivision layers.
+     * Scale       → minW (log-spaced 600 → 6 px).  Right end feels massively different.
+     * Rhythm      → biases every split-point toward the golden cascade PHI / (1−PHI),
+     *               varying by diagonal position → compositional flow from BL→TR.
+     *
+     * Each leaf carries:
+     *   fillRand   — uniform [0,1], threshold for whether the cell is filled
+     *   colorRand  — uniform [0,1], maps to palette index
+     */
+    function buildRects(maxDepth, minW, minH, rhythmVal, complexityVal) {
+      const MAX_RECTS = 12000;
+      const rng = mulberry32(0x1A2B3C4D);
+      const result = [];
+
+      function split(x, y, w, h, depth) {
+        /* Always push a leaf when the budget is exhausted so every pixel of
+           the canvas is accounted for — no holes when the dense side of the
+           rhythm cascade fills the array before the sparse side is visited. */
+        if (result.length >= MAX_RECTS) {
+          result.push({ x, y, w, h, depth, fillRand: rng(), colorRand: rng() });
+          return;
+        }
+
+        const tooSmall  = w < minW * 2 && h < minH * 2;
+        const atMax     = depth >= maxDepth;
+        /* At high complexity cells rarely stop early — they recurse all the way to minW */
+        const stopChance = depth > 0 ? clamp(0.035 * depth * (1 - complexityVal * 0.72), 0, 0.40) : 0;
+        const stopEarly  = rng() < stopChance;
+
+        if (atMax || tooSmall || stopEarly) {
+          result.push({ x, y, w, h, depth, fillRand: rng(), colorRand: rng() });
+          return;
+        }
+
+        /* Split along whichever axis has more room relative to the minimum size */
+        const splitAlongWidth = (w / Math.max(minW, 1)) >= (h / Math.max(minH, 1));
+
+        /* Rhythm: diagonal flow (0 at BL, 1 at TR) biases t toward PHI cascade */
+        const nx = (x + w * 0.5) / W;
+        const ny = (y + h * 0.5) / H;
+        const diagFlow    = clamp(nx * 0.6 + (1 - ny) * 0.4, 0, 1);
+        const rhythmTarget = lerp(PHI, 1 - PHI, diagFlow);
+        const baseT        = 0.28 + rng() * 0.44;
+        const t            = lerp(baseT, rhythmTarget, rhythmVal);
+
+        if (splitAlongWidth) {
+          const w1 = Math.max(1, Math.round(w * t));
+          const w2 = Math.max(1, w - w1);
+          if (w1 >= minW) split(x,      y, w1, h, depth + 1);
+          else result.push({ x,      y, w: w1, h, depth, fillRand: rng(), colorRand: rng() });
+          if (w2 >= minW) split(x + w1, y, w2, h, depth + 1);
+          else result.push({ x: x+w1, y, w: w2, h, depth, fillRand: rng(), colorRand: rng() });
+        } else {
+          const h1 = Math.max(1, Math.round(h * t));
+          const h2 = Math.max(1, h - h1);
+          if (h1 >= minH) split(x, y,      w, h1, depth + 1);
+          else result.push({ x, y,      w, h: h1, depth, fillRand: rng(), colorRand: rng() });
+          if (h2 >= minH) split(x, y + h1, w, h2, depth + 1);
+          else result.push({ x, y: y+h1, w, h: h2, depth, fillRand: rng(), colorRand: rng() });
+        }
+      }
+
+      split(0, 0, W, H, 0);
+      return result;
+    }
+
+    function getRects(maxDepth, minW, minH, rhythmVal, complexityVal) {
+      const key = `${maxDepth}|${minW.toFixed(1)}|${minH.toFixed(1)}|${Math.round(rhythmVal * 100)}|${Math.round(complexityVal * 100)}`;
+      if (!_cache || _cache.key !== key) {
+        _cache = { key, rects: buildRects(maxDepth, minW, minH, rhythmVal, complexityVal) };
+      }
+      return _cache.rects;
+    }
+
+    function render(fi, p) {
+      ctx.fillStyle = p.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const complexityVal = parseInt(document.getElementById("tmComplexity").value, 10) / 100;
+      const scaleVal      = parseInt(document.getElementById("tmScale").value,      10) / 100;
+      const colorVal      = parseInt(document.getElementById("tmColors").value,     10) / 100;
+      const fillVal       = parseInt(document.getElementById("tmFill").value,       10) / 100;
+      const rhythmVal     = parseInt(document.getElementById("tmRhythm").value,     10) / 100;
+
+      const maxDepth = Math.max(1, Math.round(2 + 16 * complexityVal));
+      /* Complexity drives fine detail exponentially: 10^(2t) = 1→100× density.
+         Scale adds a linear 1–10× multiplier on top.  Both sliders stay
+         effective across their full range — high complexity alone produces
+         tiny boxes; scale multiplies overall density further. */
+      const complexFactor = Math.pow(10, 2 * complexityVal);  /* 1 → 100× */
+      const scaleFactor   = lerp(1, 10, scaleVal);             /* 1 → 10×  */
+      const minW          = Math.max(2, 600 / (complexFactor * scaleFactor));
+      const minH          = Math.max(1, minW * (H / W));
+
+      const rects   = getRects(maxDepth, minW, minH, rhythmVal, complexityVal);
+      const palette = buildPalette(p.bg, p.strokeColor, colorVal);
+
+      /* Fills — solid colours from palette, no alpha */
+      for (const r of rects) {
+        if (r.fillRand < fillVal) {
+          ctx.fillStyle = palette[Math.floor(r.colorRand * palette.length) % palette.length];
+          ctx.fillRect(r.x, r.y, r.w, r.h);
+        }
+      }
+
+      /* Outlines — skip entirely when stroke width is 0 */
+      if (p.strokeW > 0) {
+        ctx.strokeStyle = p.strokeColor;
+        ctx.lineWidth   = p.strokeW;
+        ctx.lineJoin    = "miter";
+        for (const r of rects) {
+          ctx.strokeRect(r.x, r.y, r.w, r.h);
+        }
+      }
+    }
+
+    return { render };
+  })();
+
+  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric, treemap };
 
   function readParams() {
     const el = id => document.getElementById(id);
@@ -1498,6 +1686,13 @@
     el("vSegDensity").textContent = el("segDensity").value;
     el("vSegSize").textContent    = el("segSize").value;
     el("vSegSpeed").textContent   = el("segSpeed").value;
+    if (document.getElementById("tmComplexity")) {
+      el("vTmComplexity").textContent = el("tmComplexity").value;
+      el("vTmScale").textContent      = el("tmScale").value;
+      el("vTmColors").textContent     = el("tmColors").value;
+      el("vTmFill").textContent       = el("tmFill").value;
+      el("vTmRhythm").textContent     = el("tmRhythm").value;
+    }
   }
 
   function updatePresetUI() {
@@ -1506,6 +1701,7 @@
     document.getElementById("gestureControls").style.display      = activePreset === "gesture"      ? "" : "none";
     document.getElementById("parametricControls").style.display   = activePreset === "parametric"   ? "" : "none";
     document.getElementById("sphereControls").style.display       = activePreset === "sphere"       ? "" : "none";
+    document.getElementById("treemapControls").style.display      = activePreset === "treemap"      ? "" : "none";
   }
 
   function paint() {
@@ -1819,17 +2015,16 @@
   const PRESET_DEFAULTS = {
     parametric: { bg: '#2D2D2B', fg: '#F44E00', frames: 450  },  /* T/N_A = 900/2 = 450 */
     sphere:     { bg: '#2D2D2B', fg: '#CCA78C', frames: 135  },  /* CYCLE_FRAMES/2 = 135 = half rotation (sphere is symmetric at 180°) */
+    treemap:    { strokeW: 1 },
   };
 
   function applyPresetColors(presetName) {
     const d = PRESET_DEFAULTS[presetName];
     if (!d) return;
-    el('bgHex').value  = d.bg;  el('bgText').value  = d.bg.toUpperCase();
-    el('fgHex').value  = d.fg;  el('fgText').value  = d.fg.toUpperCase();
-    if (d.frames) {
-      el('emergeFr').value = d.frames;
-      updateLabels();
-    }
+    if (d.bg) { el('bgHex').value = d.bg; el('bgText').value = d.bg.toUpperCase(); }
+    if (d.fg) { el('fgHex').value = d.fg; el('fgText').value = d.fg.toUpperCase(); }
+    if (d.frames) { el('emergeFr').value = d.frames; updateLabels(); }
+    if (d.strokeW != null) { el('strokeW').value = String(d.strokeW); updateLabels(); }
   }
 
   el("preset").addEventListener("change", () => {
@@ -2006,6 +2201,12 @@
       rnd('gestPos',      15,  85);
       rnd('gestFrag',      0,  50);
       rnd('gestHeight',   15,  85);
+    } else if (activePreset === 'treemap') {
+      rnd('tmComplexity', 20,  90);
+      rnd('tmScale',       5,  75);
+      rnd('tmColors',      0,  80);
+      rnd('tmFill',        0,  70);
+      rnd('tmRhythm',      0,  85);
     }
 
     updateLabels();
