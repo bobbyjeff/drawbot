@@ -77,25 +77,72 @@
     const sizeScale  = lerp(0.1, 2.0, p.segSize);
     const speedScale = lerp(0.1, 2.0, p.segSpeed);
     const count      = Math.max(1, Math.round(segs.length * clamp(lerp(0.15, 1, p.segDensity), 0.01, 1)));
-    const MIN_GAP    = 0.03;
     const t          = segNow(p);
     const cr = parseInt(p.segColor.slice(1, 3), 16);
     const cg = parseInt(p.segColor.slice(3, 5), 16);
     const cb = parseInt(p.segColor.slice(5, 7), 16);
     const color = `rgb(${cr},${cg},${cb})`;
-    const visible = segs.slice(0, count)
-      .map(cs => {
-        const pos = ((cs.pos + (t + cs.phase) * cs.drift * speedScale) % 1 + 1) % 1;
-        const hw  = cs.width * sizeScale * 0.5;
-        return { s0: clamp(pos - hw, 0, 1), s1: clamp(pos + hw, 0, 1) };
-      })
-      .filter(c => c.s1 > c.s0)
-      .sort((a, b) => a.s0 - b.s0);
-    for (let ci = 0; ci < visible.length; ci++) {
-      const cs   = visible[ci];
-      const prev = ci > 0 ? visible[ci - 1] : null;
-      if (prev && cs.s0 < prev.s1 + MIN_GAP) continue;
-      drawFn(cs.s0, cs.s1, color);
+    for (let i = 0; i < count; i++) {
+      const cs  = segs[i];
+      const pos = ((cs.pos + (t + cs.phase) * cs.drift * speedScale) % 1 + 1) % 1;
+      const hw  = cs.width * sizeScale * 0.5;
+      const s0  = pos - hw;
+      const s1  = pos + hw;
+      if (s1 <= s0) continue;
+      /* Wrap-around: when a segment straddles the 0/1 boundary draw both halves
+         so it crosses smoothly rather than teleporting to the other end. */
+      if (s0 < 0) {
+        if (1 + s0 < 1) drawFn(1 + s0, 1, color);
+        if (s1 > 0)     drawFn(0, s1,   color);
+      } else if (s1 > 1) {
+        drawFn(s0,     1,      color);
+        drawFn(0, s1 - 1,      color);
+      } else {
+        drawFn(s0, s1, color);
+      }
+    }
+  }
+
+  /* ─── shared node helpers ─── */
+  function makeNodes(seed, count) {
+    const rng = mulberry32(seed);
+    return Array.from({ length: count }, () => ({
+      pos:   rng(),
+      drift: (0.3 + rng() * 0.7) * (rng() > 0.5 ? 1 : -1),
+      phase: rng(),
+    }));
+  }
+
+  /** Evaluate a cubic bezier at parameter t — returns canvas-space {x,y}. */
+  function bezierPoint(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, t) {
+    const ax = lerp(p0x, p1x, t), ay = lerp(p0y, p1y, t);
+    const bx = lerp(p1x, p2x, t), by = lerp(p1y, p2y, t);
+    const cx = lerp(p2x, p3x, t), cy = lerp(p2y, p3y, t);
+    const dx = lerp(ax, bx, t),   dy = lerp(ay, by, t);
+    const ex = lerp(bx, cx, t),   ey = lerp(by, cy, t);
+    return { x: lerp(dx, ex, t), y: lerp(dy, ey, t) };
+  }
+
+  /** Point on rounded-rect perimeter at pos [0,1], in logical (pre-sv) coords. */
+  function roundRectPoint(cx, cy, hw, hh, pos) {
+    const d = ((pos % 1) + 1) % 1 * (4 * (hw + hh));
+    const w2 = 2 * hw, h2 = 2 * hh;
+    if (d < w2)           return { x: cx - hw + d,              y: cy - hh };
+    if (d < w2 + h2)      return { x: cx + hw,                  y: cy - hh + (d - w2) };
+    if (d < 2 * w2 + h2)  return { x: cx + hw - (d - w2 - h2), y: cy + hh };
+    return                       { x: cx - hw,                  y: cy + hh - (d - 2 * w2 - h2) };
+  }
+
+  /** drawFn(pos) — pos in [0,1] along the stroke */
+  function applyNodes(nodes, p, drawFn) {
+    if (!nodes.length || !p.nodeEnabled) return;
+    const speedScale = lerp(0.05, 3.0, p.nodeSpeed);
+    const count      = Math.max(1, Math.round(nodes.length * clamp(lerp(0.05, 1.0, p.nodeDensity), 0.01, 1)));
+    const t          = segNow(p);
+    for (let i = 0; i < Math.min(count, nodes.length); i++) {
+      const n   = nodes[i];
+      const pos = ((n.pos + (t + n.phase) * n.drift * speedScale) % 1 + 1) % 1;
+      drawFn(pos);
     }
   }
 
@@ -118,13 +165,14 @@
     const MAX_DIST = Math.max(...START_YS.map(sy => Math.abs(sy - CY)));
     const lineMeta = START_YS.map(sy => ({ normDist: Math.abs(sy - CY) / MAX_DIST }));
 
-    function drawLineSegment(line, tStart, tEnd, strokeColor, lineWidth) {
+    function drawLineSegment(line, tStart, tEnd, strokeColor, lineWidth, convX, convY) {
       if (tEnd <= tStart) return;
       const s = VIEW_SCALE;
       const p0x = LEFT_X*s, p0y = line.sy*s;
       const p1x = line.c1x*s, p1y = line.c1y*s;
       const p2x = line.c2x*s, p2y = line.c2y*s;
-      const p3x = CONVERGE_X*s, p3y = CY*s;
+      const p3x = (convX !== undefined ? convX : CONVERGE_X)*s;
+      const p3y = (convY !== undefined ? convY : CY)*s;
 
       let sub;
       if (tStart <= 0 && tEnd >= 1) {
@@ -147,6 +195,8 @@
       ctx.bezierCurveTo(sub.x1, sub.y1, sub.x2, sub.y2, sub.x3, sub.y3);
       ctx.stroke();
     }
+
+    const CONVERGE_NODE_DESCS = Array.from({ length: N }, (_, i) => makeNodes(0xC0DE0000 + i * 29, 8));
 
     const rng = mulberry32(42);
     const BREAK_ZONE = (CONVERGE_X - LEFT_X) / (RIGHT_X - LEFT_X) * 0.7;
@@ -191,12 +241,48 @@
       ctx.fillStyle = p.bg;
       ctx.fillRect(0, 0, W, H);
 
+      const VH = H / VIEW_SCALE;
+      const bendVal = parseInt(document.getElementById("convergeBend").value, 10) / 100;
+      const bentConvergeX = lerp(CONVERGE_X, RIGHT_X * 0.92, bendVal);
+      const bentConvergeY = lerp(CY, VH * 0.06, bendVal);
+      const bendShift = (VH * 0.85 - CY) * bendVal;
+      const bentCurveSpan = bentConvergeX - LEFT_X;
+
+      const BENT_LINES = LINES.map(line => {
+        const bentSy = line.sy + bendShift;
+        return {
+          sy:  bentSy,
+          c1x: LEFT_X + bentCurveSpan * 0.75,
+          c1y: bentSy,
+          c2x: LEFT_X + bentCurveSpan * 0.95,
+          c2y: bentConvergeY,
+        };
+      });
+
       const tot = p.emergeFr;
       const t = ((fi % tot) + tot) % tot;
       const gp = t / tot;
 
       for (let i = 0; i < N; i++) {
-        drawLineSegment(LINES[i], 0, 1, p.strokeColor, p.strokeW);
+        drawLineSegment(BENT_LINES[i], 0, 1, p.strokeColor, p.strokeW, bentConvergeX, bentConvergeY);
+      }
+
+      if (p.nodeEnabled) {
+        const s = VIEW_SCALE;
+        ctx.fillStyle = p.nodeColor;
+        for (let i = 0; i < N; i++) {
+          const line = BENT_LINES[i];
+          const p0x = LEFT_X * s, p0y = line.sy * s;
+          const p1x = line.c1x * s, p1y = line.c1y * s;
+          const p2x = line.c2x * s, p2y = line.c2y * s;
+          const p3x = bentConvergeX * s, p3y = bentConvergeY * s;
+          applyNodes(CONVERGE_NODE_DESCS[i], p, (pos) => {
+            const pt = bezierPoint(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, pos);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
       }
 
       if (p.segEnabled) {
@@ -213,7 +299,7 @@
         const cb = parseInt(p.segColor.slice(5, 7), 16);
 
         for (let i = 0; i < densCount; i++) {
-          const line = LINES[i];
+          const line = BENT_LINES[i];
           const colorSegs = COLOR_SEGS[i]
             .map(cs => {
               const pos = (cs.pos + (segT + cs.phase) * cs.drift * speedScale) % COLOR_ZONE;
@@ -239,7 +325,7 @@
             const br  = Math.round(lerp(cr, gr, fadeBlend));
             const bg2 = Math.round(lerp(cg, gg, fadeBlend));
             const bb  = Math.round(lerp(cb, gb, fadeBlend));
-            drawLineSegment(line, cs.s0, cs.s1, `rgb(${br},${bg2},${bb})`, p.strokeW);
+            drawLineSegment(line, cs.s0, cs.s1, `rgb(${br},${bg2},${bb})`, p.strokeW, bentConvergeX, bentConvergeY);
           }
         }
       }
@@ -310,7 +396,8 @@
       }));
     });
 
-    const SPEED_SEG_DESCS = Array.from({ length: N }, (_, i) => makeSegs(0xABCD0000 + i * 7, 3));
+    const SPEED_SEG_DESCS  = Array.from({ length: N }, (_, i) => makeSegs(0xABCD0000 + i * 7, 3));
+    const SPEED_NODE_DESCS = Array.from({ length: N }, (_, i) => makeNodes(0xC0DE1000 + i * 13, 8));
 
     function render(fi, p) {
       ctx.fillStyle = p.bg;
@@ -445,6 +532,18 @@
             drawHLine(yAt, x0, x1, color, p.strokeW);
           });
         }
+
+        if (p.nodeEnabled) {
+          ctx.fillStyle = p.nodeColor;
+          applyNodes(SPEED_NODE_DESCS[i], p, (pos) => {
+            const x   = lineLeft + pos * (lineRight - lineLeft);
+            const tP  = clamp((x - LINE_LEFT) / SPAN, 0, 1);
+            const yAt = lerp(sl.sy, perspConvergeY, tP * perspVal);
+            ctx.beginPath();
+            ctx.arc(x * sv, yAt * sv, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
       }
     }
 
@@ -459,7 +558,8 @@
     const VW = RIGHT_X;
     const VH = H / VIEW_SCALE;
 
-    const PERSP_SEGS = Array.from({ length: 30 }, (_, i) => makeSegs(0xFEED0000 + i * 17, 2));
+    const PERSP_SEGS  = Array.from({ length: 30 }, (_, i) => makeSegs(0xFEED0000 + i * 17, 2));
+    const PERSP_NODES = Array.from({ length: 30 }, (_, i) => makeNodes(0xC0DE2000 + i * 11, 8));
 
     function drawRoundedRect(cx, cy, hw, hh, r, strokeColor, lineWidth) {
       const x0 = cx - hw, y0 = cy - hh, x1 = cx + hw, y1 = cy + hh;
@@ -525,9 +625,28 @@
       const expK = 3.5;
       const expDenom = Math.exp(expK) - 1;
 
+      /* Depth-fade: rings blend toward bg as they recede, disappearing before
+         the vanishing point.  Fade starts at t2 = FADE_START, fully gone at
+         t2 = FADE_END.  Rings beyond that are culled entirely. */
+      const FADE_START = 0.50;
+      const FADE_END   = 0.92;
+      const bgR  = parseInt(p.bg.slice(1,3),16), bgG  = parseInt(p.bg.slice(3,5),16), bgB  = parseInt(p.bg.slice(5,7),16);
+      const fgR  = parseInt(p.strokeColor.slice(1,3),16), fgG  = parseInt(p.strokeColor.slice(3,5),16), fgB  = parseInt(p.strokeColor.slice(5,7),16);
+
+      function fadedColor(t2) {
+        const fadeT = clamp((t2 - FADE_START) / (FADE_END - FADE_START), 0, 1);
+        const r = Math.round(fgR + (bgR - fgR) * fadeT);
+        const g = Math.round(fgG + (bgG - fgG) * fadeT);
+        const b = Math.round(fgB + (bgB - fgB) * fadeT);
+        return `rgb(${r},${g},${b})`;
+      }
+
       for (let r = 0; r < ringCount; r++) {
         const rawT = (r + animShift) / ringCount;
         const t2 = 1 - (Math.exp(expK * (1 - rawT)) - 1) / expDenom;
+
+        /* Cull rings that have faded completely into the background */
+        if (t2 >= FADE_END) continue;
 
         const hw = lerp(outerHW, outerHW * minScale, t2);
         const hh = lerp(outerHH, outerHH * minScale, t2);
@@ -535,9 +654,20 @@
         const cy = lerp(VH / 2, vpY, t2);
 
         const cornerR = Math.min(maxRadius, hw, hh) * (1 - t2 * 0.3);
+        const ringColor = fadedColor(t2);
 
         const lw = p.strokeW / sv;
-        drawRoundedRect(cx, cy, hw, hh, cornerR, p.strokeColor, lw);
+        drawRoundedRect(cx, cy, hw, hh, cornerR, ringColor, lw);
+
+        if (p.nodeEnabled) {
+          applyNodes(PERSP_NODES[r % PERSP_NODES.length], p, (pos) => {
+            const pt = roundRectPoint(cx, cy, hw, hh, pos);
+            ctx.beginPath();
+            ctx.arc(pt.x * sv, pt.y * sv, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
+        }
 
         if (p.segEnabled) {
           applySegs(PERSP_SEGS[r % PERSP_SEGS.length], gp, p, (s0, s1, color) => {
@@ -545,7 +675,11 @@
             const segLen = (s1 - s0) * perimCanvas;
             ctx.setLineDash([segLen, Math.max(perimCanvas - segLen, 0)]);
             ctx.lineDashOffset = -s0 * perimCanvas;
-            drawRoundedRect(cx, cy, hw, hh, cornerR, color, lw);
+            /* Segments also fade with depth */
+            const segFadeT = clamp((t2 - FADE_START) / (FADE_END - FADE_START), 0, 1);
+            const sr2 = parseInt(color.slice(1,3)||'0',16)||0, sg2 = parseInt(color.slice(3,5)||'0',16)||0, sb2 = parseInt(color.slice(5,7)||'0',16)||0;
+            const sc = `rgb(${Math.round(sr2+(bgR-sr2)*segFadeT)},${Math.round(sg2+(bgG-sg2)*segFadeT)},${Math.round(sb2+(bgB-sb2)*segFadeT)})`;
+            drawRoundedRect(cx, cy, hw, hh, cornerR, sc, lw);
           });
           ctx.setLineDash([]);
           ctx.lineDashOffset = 0;
@@ -589,7 +723,8 @@
     const VW = RIGHT_X;
     const VH = H / VIEW_SCALE;
 
-    const GESTURE_SEGS = makeSegs(0xDEAD0000, 3);
+    const GESTURE_SEGS  = makeSegs(0xDEAD0000, 3);
+    const GESTURE_NODES = makeNodes(0xC0DE3000, 12);
 
     function render(fi, p) {
       ctx.fillStyle = p.bg;
@@ -693,6 +828,20 @@
           idx = nextIdx;
           if (idx >= points.length - 1) break;
         }
+      }
+
+      if (p.nodeEnabled) {
+        ctx.fillStyle = p.nodeColor;
+        applyNodes(GESTURE_NODES, p, (pos) => {
+          const fi = pos * (points.length - 1);
+          const i0 = Math.min(Math.floor(fi), points.length - 2);
+          const frac = fi - i0;
+          const x = lerp(points[i0].x, points[i0 + 1].x, frac);
+          const y = lerp(points[i0].y, points[i0 + 1].y, frac);
+          ctx.beginPath();
+          ctx.arc(x * sv, y * sv, p.strokeW * 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
       if (p.segEnabled && fragVal < 0.01) {
@@ -1014,7 +1163,8 @@
     const FADE_IN    = 0.08;
     const FADE_OUT   = 0.12;
 
-    const PLANES_PATH_SEGS = Array.from({ length: NUM_PLANES }, (_, i) => makeSegs(0xB00B0000 + i * 17, 3));
+    const PLANES_PATH_SEGS  = Array.from({ length: NUM_PLANES }, (_, i) => makeSegs(0xB00B0000 + i * 17, 3));
+    const PLANES_NODE_DESCS = Array.from({ length: NUM_PLANES }, (_, i) => makeNodes(0xC0DE6000 + i * 19, 8));
 
     function drawPlane(cxPx, hw, tyPx, byPx) {
       const rx = cxPx + hw;
@@ -1068,6 +1218,33 @@
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = p.strokeColor;
         drawPlane(cxPx, hw, tyPx, byPx);
+
+        if (p.nodeEnabled && hw >= sv) {
+          const rx   = cxPx + hw;
+          const lx   = cxPx - hw;
+          const dLen = Math.sqrt((rx - lx) ** 2 + vLen ** 2);
+          const totalLen = 2 * vLen + 2 * dLen;
+          applyNodes(PLANES_NODE_DESCS[i], p, (pos) => {
+            const d = pos * totalLen;
+            let nx, ny;
+            if (d < vLen) {
+              nx = rx; ny = byPx - d;
+            } else if (d < vLen + dLen) {
+              const t = (d - vLen) / dLen;
+              nx = rx + (lx - rx) * t; ny = tyPx + (byPx - tyPx) * t;
+            } else if (d < 2 * vLen + dLen) {
+              const t = (d - vLen - dLen) / vLen;
+              nx = lx; ny = byPx - vLen * t;
+            } else {
+              const t = (d - 2 * vLen - dLen) / dLen;
+              nx = lx + (rx - lx) * t; ny = tyPx + (byPx - tyPx) * t;
+            }
+            ctx.beginPath();
+            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
+        }
 
         if (p.segEnabled && hw >= sv) {
           const rx      = cxPx + hw;
@@ -1136,7 +1313,8 @@
 
     const CYCLE_FRAMES = 270;  /* ~9s at 30fps */
 
-    const SPHERE_SEGS = Array.from({ length: 16 }, (_, i) => makeSegs(0xC0DE0000 + i * 13, 2));
+    const SPHERE_SEGS  = Array.from({ length: 16 }, (_, i) => makeSegs(0xC0DE0000 + i * 13, 2));
+    const SPHERE_NODES = Array.from({ length: 16 }, (_, i) => makeNodes(0xC0DE7000 + i * 23, 8));
 
     function ringAlpha(phase) {
       let a;
@@ -1198,6 +1376,23 @@
         ctx.beginPath();
         ctx.ellipse(0, yCtr * sv, Math.max(rx * sv, 0.5), Math.max(ry * sv, 0.5), 0, 0, Math.PI * 2);
         ctx.stroke();
+
+        if (p.nodeEnabled) {
+          /* Nodes disappear sooner than rings as size shrinks —
+             squaring sizeAlpha makes them fade twice as fast. */
+          const savedAlpha = ctx.globalAlpha;
+          ctx.globalAlpha  = savedAlpha * sizeAlpha;
+          applyNodes(SPHERE_NODES[i % SPHERE_NODES.length], p, (pos) => {
+            const angle = pos * Math.PI * 2;
+            const nx = rx * sv * Math.cos(angle);
+            const ny = yCtr * sv + ry * sv * Math.sin(angle);
+            ctx.beginPath();
+            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
+          ctx.globalAlpha = savedAlpha;
+        }
 
         if (p.segEnabled) {
           applySegs(SPHERE_SEGS[i % SPHERE_SEGS.length], rawPhase, p, (s0, s1, color) => {
@@ -1261,10 +1456,88 @@
     /* N_A is controlled via the Curves slider; N_B=1 always adds one dup of FA0 */
     const N_B  = 1;
     const SEGS = 400;
-    const T    = 900;   /* slightly slower; visual loop ≈ T/12 = 75 frames */
+    const T    = 900;   /* phase cycle; visual sub-loop = T/N_A frames */
 
-    const PARAM_SEGS_A = Array.from({ length: 9 }, (_, i) => makeSegs(0xAAAA0000 + i * 23, 2));
-    const PARAM_SEGS_B = makeSegs(0xBBBB0000, 2);
+    const PARAM_SEGS_A  = Array.from({ length: 9 }, (_, i) => makeSegs(0xAAAA0000 + i * 23, 2));
+    const PARAM_SEGS_B  = makeSegs(0xBBBB0000, 2);
+    const PARAM_NODES_A = Array.from({ length: 9 }, (_, i) => makeNodes(0xC0DE4000 + i * 37, 6));
+    const PARAM_NODES_B = makeNodes(0xC0DE5000, 6);
+
+    /** Evaluate a Lissajous point at normalised arc position s ∈ ℝ (wraps at integers). */
+    function paramPointAt(s, φ, ψ, familyA) {
+      const t  = s * Math.PI * 2;
+      const sx = familyA
+        ? (CX + Rx * Math.sin(B * t + δ_holder.δ + φ)) * sv
+        : (CX + Rx * Math.sin(B * t + δ_holder.δ)) * sv;
+      const sy = familyA
+        ? (CY - Ry * Math.sin(A * t)) * sv
+        : (CY - Ry * Math.sin(A * t + ψ)) * sv;
+      return { x: sx, y: sy };
+    }
+    /* Mutable holder so paramPointAt can read the current frame's δ. */
+    const δ_holder = { δ: 0 };
+
+    /**
+     * Draw one segment along the curve with fractional sampling and a single
+     * continuous path across the 0/1 closure — no integer vertex snapping.
+     */
+    function drawParametricSegment(s0, s1, color, φ, ψ, familyA) {
+      if (s1 <= s0) return;
+
+      /* Normalise any real-valued arc endpoints into [0,1] spans.
+         Without this, positions > 1 produce a [0, s1-1] span that covers
+         almost the entire curve and hides the dashed base stroke. */
+      const len   = Math.min(s1 - s0, 1);
+      const a0    = ((s0 % 1) + 1) % 1;
+      const a1    = a0 + len;
+      const spans = a1 <= 1 + 1e-9
+        ? [[a0, a1]]
+        : [[a0, 1], [0, a1 - 1]];
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = p_holder.strokeW;
+      ctx.lineCap     = 'round';
+      ctx.lineJoin    = 'round';
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      let moved = false;
+      for (const [a, b] of spans) {
+        if (b <= a) continue;
+        const steps = Math.max(6, Math.round((b - a) * SEGS));
+        for (let j = 0; j <= steps; j++) {
+          const s  = a + (b - a) * (j / steps);
+          const pt = paramPointAt(s, φ, ψ, familyA);
+          if (!moved) { ctx.moveTo(pt.x, pt.y); moved = true; }
+          else        ctx.lineTo(pt.x, pt.y);
+        }
+      }
+      if (moved) ctx.stroke();
+    }
+    const p_holder = { strokeW: 1 };
+
+    /** Parametric segment pass — continuous position, clean round-capped ends. */
+    function applyParametricSegs(segs, p, φ, ψ, familyA) {
+      if (!segs.length) return;
+      p_holder.strokeW = p.strokeW;
+      const sizeScale  = lerp(0.1, 2.0, p.segSize);
+      const speedScale = lerp(0.1, 2.0, p.segSpeed);
+      const count      = Math.max(1, Math.round(segs.length * clamp(lerp(0.15, 1, p.segDensity), 0.01, 1)));
+      const t          = segNow(p);
+      const cr = parseInt(p.segColor.slice(1, 3), 16);
+      const cg = parseInt(p.segColor.slice(3, 5), 16);
+      const cb = parseInt(p.segColor.slice(5, 7), 16);
+      const color = `rgb(${cr},${cg},${cb})`;
+
+      for (let i = 0; i < count; i++) {
+        const cs     = segs[i];
+        const rawPos = cs.pos + (t + cs.phase) * cs.drift * speedScale;
+        const hw     = cs.width * sizeScale * 0.5;
+        const s0     = rawPos - hw;
+        const s1     = rawPos + hw;
+        if (s1 <= s0) continue;
+        drawParametricSegment(s0, s1, color, φ, ψ, familyA);
+      }
+    }
 
     function render(fi, p) {
       /* N_A driven by the Curves slider: visible total = N_A + N_B = N_A + 1 */
@@ -1274,6 +1547,7 @@
       ctx.fillRect(0, 0, W, H);
 
       const δ = (fi % T) / T * Math.PI * 2;
+      δ_holder.δ = δ;
 
       ctx.strokeStyle = p.strokeColor;
       ctx.lineWidth   = p.strokeW;
@@ -1310,52 +1584,47 @@
 
       ctx.setLineDash([]);
 
-      if (p.segEnabled) {
-        const segGp = (fi % T) / T;
+      if (p.nodeEnabled) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle   = p.nodeColor;
+        /* Pulse: each node breathes in size over time so movement is perceptible
+           even when the curve topology makes positional drift hard to track. */
+        const tPulse = segNow(p) * Math.PI * 3;
+        for (let k = 0; k < N_A; k++) {
+          const φ = k * Math.PI * 2 / N_A;
+          applyNodes(PARAM_NODES_A[k % PARAM_NODES_A.length], p, (pos) => {
+            const t  = pos * Math.PI * 2;
+            const sx = (CX + Rx * Math.sin(B * t + δ + φ)) * sv;
+            const sy = (CY - Ry * Math.sin(A * t)) * sv;
+            const pulse = 1 + 0.35 * Math.sin(tPulse + pos * 9);
+            ctx.beginPath();
+            ctx.arc(sx, sy, p.strokeW * 3 * pulse, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        for (let k = 0; k < N_B; k++) {
+          const ψ = k * Math.PI * 2 / N_B;
+          applyNodes(PARAM_NODES_B, p, (pos) => {
+            const t  = pos * Math.PI * 2;
+            const sx = (CX + Rx * Math.sin(B * t + δ)) * sv;
+            const sy = (CY - Ry * Math.sin(A * t + ψ)) * sv;
+            const pulse = 1 + 0.35 * Math.sin(tPulse + pos * 9);
+            ctx.beginPath();
+            ctx.arc(sx, sy, p.strokeW * 3 * pulse, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+      }
 
+      if (p.segEnabled) {
         /* Family A segments */
         for (let k = 0; k < N_A; k++) {
           const φ = k * Math.PI * 2 / N_A;
-          applySegs(PARAM_SEGS_A[k % PARAM_SEGS_A.length], segGp, p, (s0, s1, color) => {
-            const i0 = Math.floor(s0 * SEGS);
-            const i1 = Math.ceil(s1 * SEGS);
-            if (i1 <= i0) return;
-            ctx.strokeStyle = color;
-            ctx.lineWidth   = p.strokeW;
-            ctx.lineCap     = 'round';
-            ctx.lineJoin    = 'round';
-            ctx.beginPath();
-            for (let j = i0; j <= i1; j++) {
-              const t  = j / SEGS * Math.PI * 2;
-              const sx = (CX + Rx * Math.sin(B * t + δ + φ)) * sv;
-              const sy = (CY - Ry * Math.sin(A * t)) * sv;
-              j === i0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
-            }
-            ctx.stroke();
-          });
+          applyParametricSegs(PARAM_SEGS_A[k % PARAM_SEGS_A.length], p, φ, 0, true);
         }
 
         /* Family B segments */
-        {
-          const ψ = 0;
-          applySegs(PARAM_SEGS_B, segGp, p, (s0, s1, color) => {
-            const i0 = Math.floor(s0 * SEGS);
-            const i1 = Math.ceil(s1 * SEGS);
-            if (i1 <= i0) return;
-            ctx.strokeStyle = color;
-            ctx.lineWidth   = p.strokeW;
-            ctx.lineCap     = 'round';
-            ctx.lineJoin    = 'round';
-            ctx.beginPath();
-            for (let j = i0; j <= i1; j++) {
-              const t  = j / SEGS * Math.PI * 2;
-              const sx = (CX + Rx * Math.sin(B * t + δ)) * sv;
-              const sy = (CY - Ry * Math.sin(A * t + ψ)) * sv;
-              j === i0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
-            }
-            ctx.stroke();
-          });
-        }
+        applyParametricSegs(PARAM_SEGS_B, p, 0, 0, false);
       }
     }
 
@@ -1368,6 +1637,7 @@
      ══════════════════════════════════════════ */
   const treemap = (function () {
     let _cache = null;
+    const TM_MARGIN = 40 * VIEW_SCALE;  /* 40 logical-px margin on each side */
 
     /* ── color helpers ── */
     function hexToRgb(hex) {
@@ -1441,7 +1711,9 @@
      *   fillRand   — uniform [0,1], threshold for whether the cell is filled
      *   colorRand  — uniform [0,1], maps to palette index
      */
-    function buildRects(maxDepth, minW, minH, rhythmVal, complexityVal) {
+    function buildRects(maxDepth, minW, minH, rhythmVal, complexityVal, gravityVal) {
+      const IW = W - 2 * TM_MARGIN;  /* inner width  — rects live in [0, IW] × [0, IH] */
+      const IH = H - 2 * TM_MARGIN;  /* inner height — TM_MARGIN offset applied at render */
       const MAX_RECTS = 12000;
       const rng = mulberry32(0x1A2B3C4D);
       const result = [];
@@ -1455,13 +1727,30 @@
           return;
         }
 
-        const tooSmall  = w < minW * 2 && h < minH * 2;
-        const atMax     = depth >= maxDepth;
+        /*
+         * Gravity: distance from the gravity anchor, normalised against the inner area.
+         * diagFlow = 0 → at gravity point → stop early → large block.
+         * diagFlow = 1 → farthest corner   → full depth  → tiny blocks.
+         * Quadratic curve concentrates the large-block zone tightly around the anchor,
+         * mimicking an Illustrator blend-tool large→small radial gradient.
+         */
+        const nx   = (x + w * 0.5) / IW;
+        const ny   = (y + h * 0.5) / IH;
+        const vizX = nx;
+        const vizY = 1 - ny;  /* 0=bottom, 1=top */
+        const dx   = vizX - gravityVal;
+        const dy   = vizY - gravityVal;
+        const diagFlow   = clamp(Math.sqrt(dx * dx + dy * dy) / Math.SQRT2, 0, 1);
+        const depthBudget = Math.max(1, Math.floor(maxDepth * diagFlow * diagFlow));
+
+        const tooSmall   = w < minW * 2 && h < minH * 2;
+        const atMax      = depth >= maxDepth;
+        const overBudget = depth >= depthBudget;
         /* At high complexity cells rarely stop early — they recurse all the way to minW */
         const stopChance = depth > 0 ? clamp(0.035 * depth * (1 - complexityVal * 0.72), 0, 0.40) : 0;
         const stopEarly  = rng() < stopChance;
 
-        if (atMax || tooSmall || stopEarly) {
+        if (atMax || tooSmall || overBudget || stopEarly) {
           result.push({ x, y, w, h, depth, fillRand: rng(), colorRand: rng() });
           return;
         }
@@ -1469,10 +1758,7 @@
         /* Split along whichever axis has more room relative to the minimum size */
         const splitAlongWidth = (w / Math.max(minW, 1)) >= (h / Math.max(minH, 1));
 
-        /* Rhythm: diagonal flow (0 at BL, 1 at TR) biases t toward PHI cascade */
-        const nx = (x + w * 0.5) / W;
-        const ny = (y + h * 0.5) / H;
-        const diagFlow    = clamp(nx * 0.6 + (1 - ny) * 0.4, 0, 1);
+        /* Rhythm: split-point bias rides along the same diagFlow gradient */
         const rhythmTarget = lerp(PHI, 1 - PHI, diagFlow);
         const baseT        = 0.28 + rng() * 0.44;
         const t            = lerp(baseT, rhythmTarget, rhythmVal);
@@ -1494,19 +1780,22 @@
         }
       }
 
-      split(0, 0, W, H, 0);
+      split(0, 0, IW, IH, 0);
       return result;
     }
 
-    function getRects(maxDepth, minW, minH, rhythmVal, complexityVal) {
-      const key = `${maxDepth}|${minW.toFixed(1)}|${minH.toFixed(1)}|${Math.round(rhythmVal * 100)}|${Math.round(complexityVal * 100)}`;
+    function getRects(maxDepth, minW, minH, rhythmVal, complexityVal, gravityVal) {
+      const key = `${maxDepth}|${minW.toFixed(1)}|${minH.toFixed(1)}|${Math.round(rhythmVal * 100)}|${Math.round(complexityVal * 100)}|${Math.round(gravityVal * 100)}`;
       if (!_cache || _cache.key !== key) {
-        _cache = { key, rects: buildRects(maxDepth, minW, minH, rhythmVal, complexityVal) };
+        _cache = { key, rects: buildRects(maxDepth, minW, minH, rhythmVal, complexityVal, gravityVal) };
       }
       return _cache.rects;
     }
 
     function render(fi, p) {
+      const IW = W - 2 * TM_MARGIN;
+      const IH = H - 2 * TM_MARGIN;
+
       ctx.fillStyle = p.bg;
       ctx.fillRect(0, 0, W, H);
 
@@ -1515,35 +1804,79 @@
       const colorVal      = parseInt(document.getElementById("tmColors").value,     10) / 100;
       const fillVal       = parseInt(document.getElementById("tmFill").value,       10) / 100;
       const rhythmVal     = parseInt(document.getElementById("tmRhythm").value,     10) / 100;
+      const gravityVal    = parseInt(document.getElementById("tmGravity").value,    10) / 100;
 
       const maxDepth = Math.max(1, Math.round(2 + 16 * complexityVal));
-      /* Complexity drives fine detail exponentially: 10^(2t) = 1→100× density.
-         Scale adds a linear 1–10× multiplier on top.  Both sliders stay
-         effective across their full range — high complexity alone produces
-         tiny boxes; scale multiplies overall density further. */
-      const complexFactor = Math.pow(10, 2 * complexityVal);  /* 1 → 100× */
-      const scaleFactor   = lerp(1, 10, scaleVal);             /* 1 → 10×  */
+      const complexFactor = Math.pow(10, 2 * complexityVal);
+      const scaleFactor   = lerp(1, 10, scaleVal);
       const minW          = Math.max(2, 600 / (complexFactor * scaleFactor));
-      const minH          = Math.max(1, minW * (H / W));
+      const minH          = Math.max(1, minW * (IH / IW));
 
-      const rects   = getRects(maxDepth, minW, minH, rhythmVal, complexityVal);
+      const rects   = getRects(maxDepth, minW, minH, rhythmVal, complexityVal, gravityVal);
       const palette = buildPalette(p.bg, p.strokeColor, colorVal);
 
-      /* Fills — solid colours from palette, no alpha */
+      /*
+       * Animation: diagonal sweep from BL → TR.
+       * sweepGp compresses the full reveal into 78% of the loop, leaving a
+       * clean hold at the end before looping. This prevents the dense TR region
+       * (many small blocks) from dragging across the tail of the animation.
+       * REVEAL_WIN: how long each block takes to grow in (fraction of loop).
+       * Smaller = snappier individual reveals, less simultaneous overlap.
+       */
+      const tot = p.emergeFr;
+      const gp  = ((fi % tot) + tot) % tot / tot;
+
+      /*
+       * Scatter / assemble loop.
+       * cosT oscillates 1→0→1 per loop (gp=0: scattered, gp=0.5: assembled,
+       * gp=1: scattered again). Cubing gives ease-out into the assembled state:
+       * blocks drift slowly into their final positions and linger there, then
+       * gently scatter back out — perfectly seamless because cos is smooth at
+       * both ends of the loop (position AND velocity are continuous).
+       */
+      const cosT     = 0.5 + 0.5 * Math.cos(2 * Math.PI * gp);
+      const scatterT = cosT * cosT * cosT;
+
+      /* Fills */
       for (const r of rects) {
-        if (r.fillRand < fillVal) {
-          ctx.fillStyle = palette[Math.floor(r.colorRand * palette.length) % palette.length];
-          ctx.fillRect(r.x, r.y, r.w, r.h);
-        }
+        if (r.fillRand >= fillVal) continue;
+        const rcx = r.x + r.w * 0.5;
+        const rcy = r.y + r.h * 0.5;
+        /* Deterministic per-block scatter vector — no RNG state change,
+           derived purely from the block's geometry via integer hash. */
+        let h = (Math.round(r.x) * 73856093 ^ Math.round(r.y) * 19349663 ^ Math.round(r.w) * 83492791) >>> 0;
+        h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b) >>> 0; h ^= h >>> 16;
+        const v1 = h / 0x100000000;
+        h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0; h ^= h >>> 16;
+        const v2 = h / 0x100000000;
+        /* Radial outward from inner-area centre + angular jitter so pieces
+           scatter like a real explosion rather than a uniform radial fan. */
+        const angle = Math.atan2(rcy - IH * 0.5, rcx - IW * 0.5) + (v1 - 0.5) * 1.8;
+        const mag   = lerp(800, 2800, v2);
+        const offX  = Math.cos(angle) * mag * scatterT;
+        const offY  = Math.sin(angle) * mag * scatterT;
+        ctx.fillStyle = palette[Math.floor(r.colorRand * palette.length) % palette.length];
+        ctx.fillRect(TM_MARGIN + r.x + offX, TM_MARGIN + r.y + offY, r.w, r.h);
       }
 
-      /* Outlines — skip entirely when stroke width is 0 */
+      /* Outlines */
       if (p.strokeW > 0) {
         ctx.strokeStyle = p.strokeColor;
         ctx.lineWidth   = p.strokeW;
         ctx.lineJoin    = "miter";
         for (const r of rects) {
-          ctx.strokeRect(r.x, r.y, r.w, r.h);
+          const rcx = r.x + r.w * 0.5;
+          const rcy = r.y + r.h * 0.5;
+          let h = (Math.round(r.x) * 73856093 ^ Math.round(r.y) * 19349663 ^ Math.round(r.w) * 83492791) >>> 0;
+          h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b) >>> 0; h ^= h >>> 16;
+          const v1 = h / 0x100000000;
+          h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35) >>> 0; h ^= h >>> 16;
+          const v2 = h / 0x100000000;
+          const angle = Math.atan2(rcy - IH * 0.5, rcx - IW * 0.5) + (v1 - 0.5) * 1.8;
+          const mag   = lerp(800, 2800, v2);
+          const offX  = Math.cos(angle) * mag * scatterT;
+          const offY  = Math.sin(angle) * mag * scatterT;
+          ctx.strokeRect(TM_MARGIN + r.x + offX, TM_MARGIN + r.y + offY, r.w, r.h);
         }
       }
     }
@@ -1566,6 +1899,10 @@
       segDensity: parseInt(el("segDensity").value, 10) / 100,
       segSize:    parseInt(el("segSize").value, 10) / 100,
       segSpeed:   parseInt(el("segSpeed").value, 10) / 100,
+      nodeEnabled: el("nodeEnabled").checked,
+      nodeColor:   el("nodeHex").value,
+      nodeDensity: parseInt(el("nodeDensity").value, 10) / 100,
+      nodeSpeed:   parseInt(el("nodeSpeed").value, 10) / 100,
     };
   }
 
@@ -1642,6 +1979,9 @@
     el("scrub").max = String(maxFi);
     if (frameIndex > maxFi) frameIndex = maxFi;
 
+    if (document.getElementById("convergeBend")) {
+      el("vConvergeBend").textContent = el("convergeBend").value;
+    }
     if (document.getElementById("sphereRings")) {
       el("vSphereRings").textContent = el("sphereRings").value;
     }
@@ -1683,19 +2023,23 @@
       el("vGestFrag").textContent = el("gestFrag").value;
       el("vGestHeight").textContent = el("gestHeight").value;
     }
-    el("vSegDensity").textContent = el("segDensity").value;
-    el("vSegSize").textContent    = el("segSize").value;
-    el("vSegSpeed").textContent   = el("segSpeed").value;
+    el("vSegDensity").textContent  = el("segDensity").value;
+    el("vSegSize").textContent     = el("segSize").value;
+    el("vSegSpeed").textContent    = el("segSpeed").value;
+    el("vNodeDensity").textContent = el("nodeDensity").value;
+    el("vNodeSpeed").textContent   = el("nodeSpeed").value;
     if (document.getElementById("tmComplexity")) {
       el("vTmComplexity").textContent = el("tmComplexity").value;
       el("vTmScale").textContent      = el("tmScale").value;
       el("vTmColors").textContent     = el("tmColors").value;
       el("vTmFill").textContent       = el("tmFill").value;
       el("vTmRhythm").textContent     = el("tmRhythm").value;
+      el("vTmGravity").textContent    = el("tmGravity").value;
     }
   }
 
   function updatePresetUI() {
+    document.getElementById("convergeControls").style.display     = activePreset === "converge"     ? "" : "none";
     document.getElementById("speedControls").style.display        = activePreset === "speed"        ? "" : "none";
     document.getElementById("perspectiveControls").style.display  = activePreset === "perspective"  ? "" : "none";
     document.getElementById("gestureControls").style.display      = activePreset === "gesture"      ? "" : "none";
@@ -1716,10 +2060,14 @@
     if (segRaf) { cancelAnimationFrame(segRaf); segRaf = null; }
   }
 
+  function segLoopActive() {
+    return el("segEnabled").checked || el("nodeEnabled").checked;
+  }
+
   function startSegLoop() {
     if (segRaf || playing) return;
     function loop() {
-      if (playing || !el("segEnabled").checked) { segRaf = null; return; }
+      if (playing || !segLoopActive()) { segRaf = null; return; }
       const p = readParams();
       renderFrame(frameIndex, p);
       segRaf = requestAnimationFrame(loop);
@@ -1758,7 +2106,7 @@
       raf = requestAnimationFrame(tick);
     } else {
       if (raf) cancelAnimationFrame(raf);
-      if (el("segEnabled").checked) startSegLoop();
+      if (segLoopActive()) startSegLoop();
     }
   }
 
@@ -1775,8 +2123,14 @@
 
   el("segEnabled").addEventListener("input", () => {
     el("segControls").style.display = el("segEnabled").checked ? "" : "none";
-    if (el("segEnabled").checked && !playing) startSegLoop();
-    else stopSegLoop();
+    if (segLoopActive() && !playing) startSegLoop();
+    else if (!segLoopActive()) stopSegLoop();
+  });
+
+  el("nodeEnabled").addEventListener("input", () => {
+    el("nodeControls").style.display = el("nodeEnabled").checked ? "" : "none";
+    if (segLoopActive() && !playing) startSegLoop();
+    else if (!segLoopActive()) stopSegLoop();
   });
 
 
@@ -2013,9 +2367,9 @@
 
   /* Per-preset default colors — applied when switching presets */
   const PRESET_DEFAULTS = {
-    parametric: { bg: '#2D2D2B', fg: '#F44E00', frames: 450  },  /* T/N_A = 900/2 = 450 */
+    parametric: { bg: '#2D2D2B', fg: '#F44E00', curves: 5, frames: 225  },  /* T/N_A = 900/4 = 225; 5 curves → 4× symmetry → ¼ the loop at original speed */
     sphere:     { bg: '#2D2D2B', fg: '#CCA78C', frames: 135  },  /* CYCLE_FRAMES/2 = 135 = half rotation (sphere is symmetric at 180°) */
-    treemap:    { strokeW: 1 },
+    treemap:    { strokeW: 1, frames: 150, canvasMode: 'og' },    /* OG canvas avoids letterbox margin asymmetry */
   };
 
   function applyPresetColors(presetName) {
@@ -2023,8 +2377,18 @@
     if (!d) return;
     if (d.bg) { el('bgHex').value = d.bg; el('bgText').value = d.bg.toUpperCase(); }
     if (d.fg) { el('fgHex').value = d.fg; el('fgText').value = d.fg.toUpperCase(); }
+    if (d.curves != null && document.getElementById('paramCurves')) {
+      el('paramCurves').value = String(d.curves);
+    }
     if (d.frames) { el('emergeFr').value = d.frames; updateLabels(); }
     if (d.strokeW != null) { el('strokeW').value = String(d.strokeW); updateLabels(); }
+    if (d.canvasMode) {
+      canvasMode = d.canvasMode;
+      el('sizeOG').classList.toggle('primary',   d.canvasMode === 'og');
+      el('size1080').classList.toggle('primary', d.canvasMode === '1080p');
+      el('size4k').classList.toggle('primary',   d.canvasMode === '4k');
+      /* applyCanvasMode() is called by the caller after this returns */
+    }
   }
 
   el("preset").addEventListener("change", () => {
@@ -2032,7 +2396,8 @@
     try {
       localStorage.setItem(OG_PRESET_STORAGE_KEY, activePreset);
     } catch (_) {}
-    applyPresetColors(activePreset);
+    applyPresetColors(activePreset);   /* may update canvasMode */
+    applyCanvasMode();                 /* re-apply in case canvasMode changed */
     updatePresetUI();
     if (activePreset === "converge") {
       frameIndex = defaultConvergeFrame(readParams());
@@ -2042,7 +2407,7 @@
     paint();
   });
 
-  [["bgHex","bgText"], ["fgHex","fgText"], ["segHex","segText"]].forEach(([pickerId, textId]) => {
+  [["bgHex","bgText"], ["fgHex","fgText"], ["segHex","segText"], ["nodeHex","nodeText"]].forEach(([pickerId, textId]) => {
     const picker = document.getElementById(pickerId);
     const text = document.getElementById(textId);
     picker.addEventListener("input", () => { text.value = picker.value.toUpperCase(); paint(); });
@@ -2067,8 +2432,8 @@
   } catch (_) {}
 
   updatePresetUI();
-  applyPresetColors(activePreset);  /* set colors for default preset */
-  applyCanvasMode();                /* apply default 1080p canvas size on load */
+  applyPresetColors(activePreset);  /* may update canvasMode (e.g. treemap → OG) */
+  applyCanvasMode();                /* apply canvas size for current mode */
 
   /* ── brand color swatches ── */
   /*
@@ -2130,6 +2495,7 @@
   buildSwatches('bgSwatches', 'bgHex', 'bgText');
   buildSwatches('fgSwatches', 'fgHex', 'fgText');
   buildSwatches('segSwatches', 'segHex', 'segText');
+  buildSwatches('nodeSwatches', 'nodeHex', 'nodeText');
 
   /* ── size toggle buttons ── */
   function setSizeMode(mode) {
@@ -2174,7 +2540,9 @@
     /* Randomize form params for the active preset */
     function rnd(id, lo, hi) { el(id).value = lo + Math.floor(Math.random() * (hi - lo + 1)); }
 
-    if (activePreset === 'parametric') {
+    if (activePreset === 'converge') {
+      rnd('convergeBend', 0, 100);
+    } else if (activePreset === 'parametric') {
       rnd('paramCurves', 2, 9);
     } else if (activePreset === 'sphere') {
       rnd('sphereRings', 3, 16);
@@ -2207,6 +2575,7 @@
       rnd('tmColors',      0,  80);
       rnd('tmFill',        0,  70);
       rnd('tmRhythm',      0,  85);
+      rnd('tmGravity',     0, 100);
     }
 
     updateLabels();
