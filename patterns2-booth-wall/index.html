@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <title>Patterns2 — Booth Wall preview</title>
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      color: #1a1a1a;
+      background: #eaeaea;
+    }
+    html,
+    body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    #bw-rev {
+      font-variant-numeric: tabular-nums;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .toolbar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .toolbar select {
+      font: inherit;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      background: #fff;
+      cursor: pointer;
+    }
+    .page-head {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    main.preview-shell {
+      flex: 1 1 auto;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-height: 0;
+      padding-block: 8px;
+    }
+    button {
+      font: inherit;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fafafa;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #292929;
+    }
+    /* Styled like the old button; native <a download> survives stricter preview sandboxes than JS .click(). */
+    a.btn-export {
+      font: inherit;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fafafa;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      box-sizing: border-box;
+    }
+    a.btn-export:hover {
+      background: #292929;
+    }
+    a.btn-export:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+    .hint {
+      font-size: 0.8rem;
+      color: #555;
+      max-width: 40rem;
+      text-align: center;
+      line-height: 1.45;
+    }
+    .preview-wrap {
+      display: grid;
+      grid-template: 1fr / 1fr;
+      align-items: stretch;
+      justify-items: stretch;
+      box-sizing: border-box;
+      width: min(2000px, calc(100vw - 48px));
+      aspect-ratio: 2000 / 1134;
+      height: auto;
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .preview-wrap svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-head">
+    <h1>Patterns2.cv — Booth Wall (Composition 10)</h1>
+    <p id="bw-rev" class="hint" aria-live="polite"></p>
+    <p class="hint">
+      <strong>Composition 10:</strong> bilinear headings + spaced grid (skewed toward BL). <strong>Wind:</strong> uniform spacing;
+      strokes stay <strong>1px</strong> like wall; BL is short strokes, TR is full <code>LINE_HALF</code>-length chords; focal dip mid-right (~reference vortex).
+      <strong>Export SVG</strong> is a blob link on pointer-down — if the IDE blocks it, use <code>npx serve</code> here.
+    </p>
+    <div class="toolbar">
+      <label>
+        Style
+        <select id="bw-style" aria-label="Pattern style">
+          <option value="wall">Composition 10 (wall)</option>
+          <option value="wind">Wind</option>
+        </select>
+      </label>
+      <a id="btn-export-svg" class="btn-export" role="button" tabindex="0" href="#" download="patterns2-booth-wall.svg"
+        >Export SVG</a>
+    </div>
+  </header>
+  <main class="preview-shell">
+    <div class="preview-wrap" aria-label="Square pattern preview">
+      <svg id="pattern-svg" xmlns="http://www.w3.org/2000/svg" viewBox="-5553 -5553 11106 11106" preserveAspectRatio="xMidYMid meet" role="img">
+      </svg>
+    </div>
+  </main>
+  <script src="./app.js?v=patterns2-persist-style-20260430"></script>
+</body>
+</html>

@@ -65,9 +65,13 @@
     }));
   }
 
-  /* Continuous time base for segments — independent of frame rate */
+  /* Continuous time base for segments — independent of frame rate.
+     During exports the loop sets _exportFrameIndex so every frame gets
+     the exact simulated time it would have at that position in the loop,
+     matching the live preview. -1 means use real wall-clock time. */
+  let _exportFrameIndex = -1;
   function segNow(p) {
-    /* Normalized so speed=1 means one cycle per animation loop duration */
+    if (_exportFrameIndex >= 0) return _exportFrameIndex / p.emergeFr;
     return (performance.now() / 1000) * (p.fps / p.emergeFr);
   }
 
@@ -1456,7 +1460,7 @@
     /* N_A is controlled via the Curves slider; N_B=1 always adds one dup of FA0 */
     const N_B  = 1;
     const SEGS = 400;
-    const T    = 900;   /* phase cycle; visual sub-loop = T/N_A frames */
+    const T    = 480;   /* phase cycle; visual sub-loop = T/N_A frames; 480/3 = 160fr = 6.7s @24fps */
 
     const PARAM_SEGS_A  = Array.from({ length: 9 }, (_, i) => makeSegs(0xAAAA0000 + i * 23, 2));
     const PARAM_SEGS_B  = makeSegs(0xBBBB0000, 2);
@@ -1554,35 +1558,56 @@
       ctx.lineCap     = 'round';
       ctx.lineJoin    = 'round';
       ctx.globalAlpha = 1;
-      ctx.setLineDash([DASH, GAP]);
 
-      /* Family A: x-phase varied, y-phase fixed */
-      for (let k = 0; k < N_A; k++) {
-        const φ = k * Math.PI * 2 / N_A;
-        ctx.beginPath();
-        for (let j = 0; j <= SEGS; j++) {
-          const t  = j / SEGS * Math.PI * 2;
-          const sx = (CX + Rx * Math.sin(B * t + δ + φ)) * sv;
-          const sy = (CY - Ry * Math.sin(A * t)) * sv;
-          j === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
-        }
-        ctx.stroke();
-      }
+      /*
+       * Recursion: draws N nested copies of the figure at geometrically
+       * decreasing scale, each slightly phase-shifted in δ so the levels
+       * appear to recede into z-space.  At recursionVal=0 only one copy
+       * is drawn — identical to the original behaviour.
+       */
+      const recursionVal  = parseInt(document.getElementById('paramRecursion')?.value ?? '0', 10) / 100;
+      const recursionDepth = recursionVal < 0.01 ? 1 : 2 + Math.round(recursionVal * 5);
+      const scaleStep      = recursionVal < 0.01 ? 1 : 1 - recursionVal * 0.42;
 
-      /* Family B: y-phase varied, x-phase fixed */
-      for (let k = 0; k < N_B; k++) {
-        const ψ = k * Math.PI * 2 / N_B;
-        ctx.beginPath();
-        for (let j = 0; j <= SEGS; j++) {
-          const t  = j / SEGS * Math.PI * 2;
-          const sx = (CX + Rx * Math.sin(B * t + δ)) * sv;
-          const sy = (CY - Ry * Math.sin(A * t + ψ)) * sv;
-          j === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+      for (let level = 0; level < recursionDepth; level++) {
+        const scale  = Math.pow(scaleStep, level);
+        if (scale < 0.04) break;
+        const Rx_l   = Rx * scale;
+        const Ry_l   = Ry * scale;
+        /* Each inner level shifts δ slightly → looks like a different depth snapshot */
+        const δ_l    = δ + level * recursionVal * Math.PI * 0.22;
+        ctx.globalAlpha = level === 0 ? 1.0 : Math.pow(0.72, level);
+        ctx.setLineDash([DASH * scale, GAP * scale]);
+
+        /* Family A */
+        for (let k = 0; k < N_A; k++) {
+          const φ = k * Math.PI * 2 / N_A;
+          ctx.beginPath();
+          for (let j = 0; j <= SEGS; j++) {
+            const t  = j / SEGS * Math.PI * 2;
+            const sx = (CX + Rx_l * Math.sin(B * t + δ_l + φ)) * sv;
+            const sy = (CY - Ry_l * Math.sin(A * t)) * sv;
+            j === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
+
+        /* Family B */
+        for (let k = 0; k < N_B; k++) {
+          const ψ = k * Math.PI * 2 / N_B;
+          ctx.beginPath();
+          for (let j = 0; j <= SEGS; j++) {
+            const t  = j / SEGS * Math.PI * 2;
+            const sx = (CX + Rx_l * Math.sin(B * t + δ_l)) * sv;
+            const sy = (CY - Ry_l * Math.sin(A * t + ψ)) * sv;
+            j === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+          }
+          ctx.stroke();
+        }
       }
 
       ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
 
       if (p.nodeEnabled) {
         ctx.globalAlpha = 1;
@@ -1884,7 +1909,239 @@
     return { render };
   })();
 
-  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric, treemap };
+  /* ══════════════════════════════════════════
+     SOCCER — slowly rotating truncated icosahedron (soccer-ball wireframe).
+     32 faces (12 pentagons + 20 hexagons) with depth-fade for 3-D roundness.
+     ══════════════════════════════════════════ */
+  const soccer = (function () {
+    const sv = VIEW_SCALE;
+    const VH = H / VIEW_SCALE;
+    const CX = RIGHT_X * 0.5;
+    const CY = VH * 0.5;
+    const R  = Math.min(CX, CY) * 0.88;
+
+    const CYCLE_FRAMES = 270;
+
+    /* ── Truncated-icosahedron geometry — built once at module load ── */
+    const _phi = (1 + Math.sqrt(5)) / 2;
+
+    /* 60 raw (pre-normalisation) vertices.
+     * Three families, each being all cyclic permutations of a signed triple. */
+    const _raw = [];
+    /* Family A: cyclic perms of (0, ±1, ±3φ) */
+    const _3phi = 3 * _phi;
+    for (const s1 of [1, -1]) for (const s2 of [1, -1]) {
+      _raw.push([0,          s1,         s2 * _3phi]);
+      _raw.push([s1,         s2 * _3phi, 0         ]);
+      _raw.push([s2 * _3phi, 0,          s1        ]);
+    }
+    /* Family B: cyclic perms of (±2, ±(1+2φ), ±φ) */
+    const _1p2phi = 1 + 2 * _phi;
+    for (const s1 of [1, -1]) for (const s2 of [1, -1]) for (const s3 of [1, -1]) {
+      _raw.push([2 * s1,       _1p2phi * s2, _phi * s3   ]);
+      _raw.push([_1p2phi * s2, _phi * s3,    2 * s1      ]);
+      _raw.push([_phi * s3,    2 * s1,       _1p2phi * s2]);
+    }
+    /* Family C: cyclic perms of (±1, ±(2+φ), ±2φ) */
+    const _2pphi = 2 + _phi, _2phi = 2 * _phi;
+    for (const s1 of [1, -1]) for (const s2 of [1, -1]) for (const s3 of [1, -1]) {
+      _raw.push([s1,          _2pphi * s2, _2phi * s3 ]);
+      _raw.push([_2pphi * s2, _2phi * s3,  s1         ]);
+      _raw.push([_2phi * s3,  s1,          _2pphi * s2]);
+    }
+    /* 60 vertices total */
+
+    /* Normalise to unit sphere */
+    const VERTS = _raw.map(([x, y, z]) => {
+      const r = Math.sqrt(x * x + y * y + z * z);
+      return [x / r, y / r, z / r];
+    });
+
+    /* Adjacency: edge length in raw space = 2 throughout (uniform edge length). */
+    const ADJ = Array.from({ length: 60 }, () => []);
+    for (let i = 0; i < 60; i++) {
+      for (let j = i + 1; j < 60; j++) {
+        const dx = _raw[i][0] - _raw[j][0];
+        const dy = _raw[i][1] - _raw[j][1];
+        const dz = _raw[i][2] - _raw[j][2];
+        if (Math.abs(dx * dx + dy * dy + dz * dz - 4) < 0.1) {
+          ADJ[i].push(j);
+          ADJ[j].push(i);
+        }
+      }
+    }
+
+    /* For directed edge from→at, return next vertex in the face on the left
+     * (= CCW face when viewed from outside the sphere). */
+    function _next(from, at) {
+      const n = VERTS[at];
+      const inc = [VERTS[from][0] - n[0], VERTS[from][1] - n[1], VERTS[from][2] - n[2]];
+      /* Project incoming direction onto tangent plane at 'at' */
+      const id  = inc[0] * n[0] + inc[1] * n[1] + inc[2] * n[2];
+      let e1x = inc[0] - id * n[0], e1y = inc[1] - id * n[1], e1z = inc[2] - id * n[2];
+      const el = Math.sqrt(e1x * e1x + e1y * e1y + e1z * e1z);
+      e1x /= el; e1y /= el; e1z /= el;
+      /* e2 = n × e1  →  "left" in tangent plane when viewed from outside */
+      const e2x = n[1] * e1z - n[2] * e1y;
+      const e2y = n[2] * e1x - n[0] * e1z;
+      const e2z = n[0] * e1y - n[1] * e1x;
+
+      let best = -Infinity, bestNb = -1;
+      for (const nb of ADJ[at]) {
+        if (nb === from) continue;
+        const out = [VERTS[nb][0] - n[0], VERTS[nb][1] - n[1], VERTS[nb][2] - n[2]];
+        const od  = out[0] * n[0] + out[1] * n[1] + out[2] * n[2];
+        const tx  = out[0] - od * n[0], ty = out[1] - od * n[1], tz = out[2] - od * n[2];
+        const ang = Math.atan2(tx * e2x + ty * e2y + tz * e2z,
+                               tx * e1x + ty * e1y + tz * e1z);
+        if (ang > best) { best = ang; bestNb = nb; }
+      }
+      return bestNb;
+    }
+
+    /* Trace all 32 faces (12 pentagons + 20 hexagons). */
+    const FACES = [];
+    {
+      const seen = new Set();
+      for (let i = 0; i < 60; i++) {
+        for (const j of ADJ[i]) {
+          if (seen.has(i * 60 + j)) continue;
+          const vi = [];
+          let prev = i, cur = j;
+          for (let k = 0; k < 8; k++) {
+            seen.add(prev * 60 + cur);
+            vi.push(prev);
+            const nxt = _next(prev, cur);
+            if (nxt < 0) break;
+            prev = cur; cur = nxt;
+            if (cur === i) { seen.add(prev * 60 + cur); vi.push(prev); break; }
+          }
+          if (vi.length === 5 || vi.length === 6) {
+            FACES.push({ vi, isPentagon: vi.length === 5 });
+          }
+        }
+      }
+    }
+
+    const SOCCER_SEGS  = makeSegs(0xD0DB0000, 8);
+    const SOCCER_NODES = makeNodes(0xD0DB7000, 12);
+
+    /* Apply Ry(rotY) × Rx(rotX) rotation to a 3-vector. */
+    function _rotV([x, y, z], cX, sX, cY, sY) {
+      const x1 =  x * cY + z * sY;
+      const z1 = -x * sY + z * cY;
+      return [x1, y * cX - z1 * sX, y * sX + z1 * cX];
+    }
+
+    function render(fi, p) {
+      ctx.fillStyle = p.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      const spinVal  = parseInt(document.getElementById('soccerSpin')?.value    ?? '50', 10) / 100;
+      const patchVal = parseInt(document.getElementById('soccerPatches')?.value ?? '50', 10) / 100;
+
+      /* speedMul=1 at default (50) → exactly one full rotation per CYCLE_FRAMES → seamless loop */
+      const speedMul = lerp(0.0, 2.0, spinVal);
+      const rotY     = (fi % CYCLE_FRAMES) / CYCLE_FRAMES * Math.PI * 2 * speedMul;
+      const rotX     = 0.4;   /* fixed tilt — ball never spins in a flat plane */
+
+      const cX = Math.cos(rotX), sX = Math.sin(rotX);
+      const cY = Math.cos(rotY), sY = Math.sin(rotY);
+      const rv = VERTS.map(v => _rotV(v, cX, sX, cY, sY));
+
+      /* Decompose bg / stroke hex colours for fill blending */
+      const br  = parseInt(p.bg.slice(1, 3), 16);
+      const bgg = parseInt(p.bg.slice(3, 5), 16);
+      const bb  = parseInt(p.bg.slice(5, 7), 16);
+      const fr  = parseInt(p.strokeColor.slice(1, 3), 16);
+      const fgg = parseInt(p.strokeColor.slice(3, 5), 16);
+      const fb  = parseInt(p.strokeColor.slice(5, 7), 16);
+
+      /* Painter's algorithm — back to front */
+      const sorted = FACES.map(face => ({
+        face,
+        avgZ: face.vi.reduce((s, i) => s + rv[i][2], 0) / face.vi.length,
+      })).sort((a, b) => a.avgZ - b.avgZ);
+
+      ctx.lineWidth = p.strokeW;
+      ctx.lineCap   = 'round';
+      ctx.lineJoin  = 'round';
+
+      for (const { face, avgZ } of sorted) {
+        /* Back-face cull: z-component of the face normal (cross product of first two edges). */
+        const v0 = rv[face.vi[0]], v1 = rv[face.vi[1]], v2 = rv[face.vi[2]];
+        const nZ = (v1[0] - v0[0]) * (v2[1] - v0[1]) - (v1[1] - v0[1]) * (v2[0] - v0[0]);
+        if (nZ >= 0) continue;  /* faces are CW-wound from outside → front-facing have nZ < 0 */
+
+        /* Depth fade: faces near the silhouette edge (low z) fade toward bg,
+         * giving the ball a convincingly round appearance. */
+        const FADE_Z = 0.18;
+        const alpha  = avgZ < FADE_Z ? Math.max(0, avgZ / FADE_Z) : 1.0;
+        if (alpha < 0.02) continue;
+        ctx.globalAlpha = alpha;
+
+        /* Orthographic projection */
+        const pts = face.vi.map(i => [
+          (CX + R * rv[i][0]) * sv,
+          (CY - R * rv[i][1]) * sv,
+        ]);
+
+        /* Fill: pentagons tinted more strongly, hexagons subtly, both toward fg */
+        if (patchVal > 0) {
+          const t = face.isPentagon ? patchVal * 0.38 : patchVal * 0.12;
+          ctx.fillStyle = `rgb(${Math.round(br + (fr - br) * t)},${Math.round(bgg + (fgg - bgg) * t)},${Math.round(bb + (fb - bb) * t)})`;
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        /* Seam lines */
+        ctx.strokeStyle = p.strokeColor;
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1;
+
+      /* Segments — arcs on the equatorial silhouette circle, sphere-preset style */
+      if (p.segEnabled) {
+        const rawPhase = (fi % CYCLE_FRAMES) / CYCLE_FRAMES;
+        applySegs(SOCCER_SEGS, rawPhase, p, (s0, s1, color) => {
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = color;
+          ctx.beginPath();
+          ctx.arc(CX * sv, CY * sv, R * sv, s0 * Math.PI * 2, s1 * Math.PI * 2);
+          ctx.stroke();
+        });
+        ctx.strokeStyle = p.strokeColor;
+      }
+
+      /* Nodes — dots travelling the equatorial circle */
+      if (p.nodeEnabled) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle   = p.nodeColor;
+        applyNodes(SOCCER_NODES, p, (pos) => {
+          const a = pos * Math.PI * 2;
+          ctx.beginPath();
+          ctx.arc((CX + R * Math.cos(a)) * sv, (CY + R * Math.sin(a)) * sv,
+                  p.strokeW * 2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      ctx.globalAlpha = 1;
+    }
+
+    return { render };
+  })();
+
+
+  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric, treemap, soccer };
 
   function readParams() {
     const el = id => document.getElementById(id);
@@ -1987,11 +2244,12 @@
     }
     if (document.getElementById("paramCurves")) {
       const curves = parseInt(el("paramCurves").value, 10);
-      el("vParamCurves").textContent = String(curves);
-      /* Auto-sync frames to T/N_A for a seamless loop */
+      el("vParamCurves").textContent    = String(curves);
+      el("vParamRecursion").textContent = el("paramRecursion").value;
+      /* Auto-sync frames to T/N_A for a seamless single loop */
       const N_A_current = curves - 1;
-      const T_param = 900;
-      const loopFrames = Math.round(T_param / N_A_current);
+      const T_param     = 480;
+      const loopFrames  = Math.round(T_param / N_A_current);
       if (activePreset === "parametric") {
         el("emergeFr").value = String(loopFrames);
         el("vEmergeFr").textContent = String(loopFrames);
@@ -2036,6 +2294,10 @@
       el("vTmRhythm").textContent     = el("tmRhythm").value;
       el("vTmGravity").textContent    = el("tmGravity").value;
     }
+    if (document.getElementById("soccerSpin")) {
+      el("vSoccerSpin").textContent    = el("soccerSpin").value;
+      el("vSoccerPatches").textContent = el("soccerPatches").value;
+    }
   }
 
   function updatePresetUI() {
@@ -2046,6 +2308,7 @@
     document.getElementById("parametricControls").style.display   = activePreset === "parametric"   ? "" : "none";
     document.getElementById("sphereControls").style.display       = activePreset === "sphere"       ? "" : "none";
     document.getElementById("treemapControls").style.display      = activePreset === "treemap"      ? "" : "none";
+    document.getElementById("soccerControls").style.display       = activePreset === "soccer"       ? "" : "none";
   }
 
   function paint() {
@@ -2118,7 +2381,7 @@
   });
 
   document.querySelectorAll(".controls input").forEach(inp => {
-    inp.addEventListener("input", () => { updateLabels(); paint(); });
+    inp.addEventListener("input", () => { updateLabels(); paint(); saveUIState(); });
   });
 
   el("segEnabled").addEventListener("input", () => {
@@ -2144,6 +2407,32 @@
     el.textContent = '✓';
     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => { el.textContent = ''; }, 400); }, 1200);
   }
+
+  el("exportPng").addEventListener("click", () => {
+    const p = readParams();
+    /* Render at 2× OG (2400×1260) regardless of current canvas mode */
+    const offscreen = document.createElement("canvas");
+    offscreen.width  = W;
+    offscreen.height = H;
+    const offCtx = canvas.getContext("2d");
+    /* Re-render the current frame into the main canvas at OG size, then snapshot */
+    const prevMode = canvasMode;
+    canvasMode = "og";
+    applyCanvasMode();
+    paint();
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement("a");
+      a.href     = url;
+      a.download = `og-${activePreset}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      /* Restore previous canvas mode */
+      canvasMode = prevMode;
+      applyCanvasMode();
+      paint();
+    }, "image/png");
+  });
 
   el("exportSvg").addEventListener("click", () => {
     const p = readParams();
@@ -2244,9 +2533,11 @@
     });
 
     for (let i = 0; i < tot; i++) {
+      _exportFrameIndex = i;
       renderFrame(i, p);
       gif.addFrame(ctx, { copy: true, delay: Math.round(1000 / p.fps) });
     }
+    _exportFrameIndex = -1;
 
     gif.on("finished", blob => {
       const url = URL.createObjectURL(blob);
@@ -2283,11 +2574,13 @@
     recorder.start();
 
     for (let i = 0; i < tot; i++) {
+      _exportFrameIndex = i;
       renderFrame(i, p);
       stream.getVideoTracks()[0].requestFrame();
       await new Promise(r => setTimeout(r, Math.round(1000 / p.fps)));
       exportPct(status, Math.round((i + 1) / tot * 100));
     }
+    _exportFrameIndex = -1;
 
     recorder.stop();
     await new Promise(r => { recorder.onstop = r; });
@@ -2332,6 +2625,7 @@
     });
 
     for (let i = 0; i < tot; i++) {
+      _exportFrameIndex = i;
       renderFrame(i, p);
       const frame = new VideoFrame(canvas, {
         timestamp: Math.round(i * 1_000_000 / p.fps),
@@ -2347,6 +2641,7 @@
 
       exportPct(status, Math.round((i + 1) / tot * 100));
     }
+    _exportFrameIndex = -1;
 
     await encoder.flush();
     encoder.close();
@@ -2367,9 +2662,10 @@
 
   /* Per-preset default colors — applied when switching presets */
   const PRESET_DEFAULTS = {
-    parametric: { bg: '#2D2D2B', fg: '#F44E00', curves: 5, frames: 225  },  /* T/N_A = 900/4 = 225; 5 curves → 4× symmetry → ¼ the loop at original speed */
+    parametric: { bg: '#2D2D2B', fg: '#F44E00', curves: 4, frames: 160  },  /* T/N_A = 480/3 = 160fr = 6.7s @24fps */
     sphere:     { bg: '#2D2D2B', fg: '#CCA78C', frames: 135  },  /* CYCLE_FRAMES/2 = 135 = half rotation (sphere is symmetric at 180°) */
     treemap:    { strokeW: 1, frames: 150, canvasMode: 'og' },    /* OG canvas avoids letterbox margin asymmetry */
+    soccer:     { bg: '#181814', fg: '#D0CCBC', frames: 270  },  /* CYCLE_FRAMES = 270 = one full rotation at default spin */
   };
 
   function applyPresetColors(presetName) {
@@ -2405,12 +2701,13 @@
       frameIndex = 0;
     }
     paint();
+    saveUIState();
   });
 
   [["bgHex","bgText"], ["fgHex","fgText"], ["segHex","segText"], ["nodeHex","nodeText"]].forEach(([pickerId, textId]) => {
     const picker = document.getElementById(pickerId);
     const text = document.getElementById(textId);
-    picker.addEventListener("input", () => { text.value = picker.value.toUpperCase(); paint(); });
+    picker.addEventListener("input", () => { text.value = picker.value.toUpperCase(); paint(); saveUIState(); });
     text.addEventListener("input", () => {
       const v = text.value.trim();
       if (/^#[0-9A-Fa-f]{6}$/.test(v)) { picker.value = v; paint(); }
@@ -2497,6 +2794,58 @@
   buildSwatches('segSwatches', 'segHex', 'segText');
   buildSwatches('nodeSwatches', 'nodeHex', 'nodeText');
 
+  /* ── UI state persistence ── */
+  const OG_STATE_KEY = 'og-nvidia-05-ui-v1';
+
+  function saveUIState() {
+    try {
+      const state = { _canvasMode: canvasMode };
+      document.querySelectorAll('.controls input, .controls select').forEach(inp => {
+        if (!inp.id) return;
+        state[inp.id] = inp.type === 'checkbox' ? inp.checked : inp.value;
+      });
+      localStorage.setItem(OG_STATE_KEY, JSON.stringify(state));
+    } catch (_) {}
+  }
+
+  function restoreUIState() {
+    try {
+      const raw = localStorage.getItem(OG_STATE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      document.querySelectorAll('.controls input, .controls select').forEach(inp => {
+        if (!inp.id || !(inp.id in state)) return;
+        if (inp.type === 'checkbox') inp.checked = state[inp.id];
+        else inp.value = state[inp.id];
+      });
+      /* Restore canvas size mode */
+      if (state._canvasMode) {
+        canvasMode = state._canvasMode;
+        el('sizeOG').classList.toggle('primary',   canvasMode === 'og');
+        el('size1080').classList.toggle('primary', canvasMode === '1080p');
+        el('size4k').classList.toggle('primary',   canvasMode === '4k');
+        applyCanvasMode();
+      }
+      /* Sync colour text fields with restored pickers */
+      [['bgHex','bgText'],['fgHex','fgText'],['segHex','segText'],['nodeHex','nodeText']].forEach(([p, t]) => {
+        const pk = el(p), tx = el(t);
+        if (pk && tx) tx.value = pk.value.toUpperCase();
+      });
+      /* Show/hide seg & node sub-panels */
+      el('segControls').style.display  = el('segEnabled').checked  ? '' : 'none';
+      el('nodeControls').style.display = el('nodeEnabled').checked ? '' : 'none';
+      /* Refresh swatch active classes */
+      ['bg','fg','seg','node'].forEach(prefix => {
+        const picker = el(prefix + 'Hex');
+        const grid   = el(prefix + 'Swatches');
+        if (!picker || !grid) return;
+        grid.querySelectorAll('.swatch').forEach(s =>
+          s.classList.toggle('active', s.dataset.hex === picker.value.toLowerCase())
+        );
+      });
+    } catch (_) {}
+  }
+
   /* ── size toggle buttons ── */
   function setSizeMode(mode) {
     canvasMode = mode;
@@ -2505,6 +2854,7 @@
     el('size4k').classList.toggle('primary', mode === '4k');
     applyCanvasMode();
     paint();
+    saveUIState();
   }
   el('sizeOG').addEventListener('click',   () => setSizeMode('og'));
   el('size1080').addEventListener('click', () => setSizeMode('1080p'));
@@ -2543,7 +2893,8 @@
     if (activePreset === 'converge') {
       rnd('convergeBend', 0, 100);
     } else if (activePreset === 'parametric') {
-      rnd('paramCurves', 2, 9);
+      rnd('paramCurves',    2,  9);
+      rnd('paramRecursion', 0, 70);
     } else if (activePreset === 'sphere') {
       rnd('sphereRings', 3, 16);
     } else if (activePreset === 'speed') {
@@ -2576,16 +2927,25 @@
       rnd('tmFill',        0,  70);
       rnd('tmRhythm',      0,  85);
       rnd('tmGravity',     0, 100);
+    } else if (activePreset === 'soccer') {
+      rnd('soccerSpin',    15,  85);
+      rnd('soccerPatches',  0, 100);
     }
 
     updateLabels();
     paint();
+    saveUIState();
   }
 
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'r' || e.key === 'R') randomize();
   });
+
+  /* Restore all slider/colour/checkbox state from the previous session.
+     Called after swatches are built so active classes can be refreshed. */
+  restoreUIState();
+  updatePresetUI();  /* re-apply in case preset was changed by restore */
 
   const p0 = readParams();
   if (activePreset === "converge") {
