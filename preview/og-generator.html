@@ -121,11 +121,12 @@
           <option value="perspective">Perspective</option>
           <option value="gesture">Gesture</option>
           <option value="wind">Wind</option>
-          <option value="planes">Planes</option>
           <option value="sphere">Sphere</option>
-          <option value="soccer">Soccer</option>
           <option value="parametric" selected>Parametric</option>
           <option value="treemap">Tree Map</option>
+          <option value="sankey">Sankey</option>
+          <option value="originLaunch">Origin Launch</option>
+          <option value="bell">Bell</option>
         </select>
       </div>
 
@@ -162,6 +163,13 @@
         <input type="range" id="strokeW" min="0" max="6" value="2" />
       </label>
 
+      <div id="bellControls" style="display:none">
+        <label class="control">
+          <span class="row"><span class="name">Height</span><span class="val" id="vBellHeight">200</span></span>
+          <input type="range" id="bellHeight" min="0" max="300" value="200" />
+        </label>
+      </div>
+
       <div id="convergeControls" style="display:none">
         <label class="control">
           <span class="row"><span class="name">Bend</span><span class="val" id="vConvergeBend">0</span></span>
@@ -176,17 +184,6 @@
         </label>
       </div>
 
-      <div id="soccerControls" style="display:none">
-        <label class="control">
-          <span class="row"><span class="name">Spin</span><span class="val" id="vSoccerSpin">50</span></span>
-          <input type="range" id="soccerSpin" min="0" max="100" value="50" />
-        </label>
-        <label class="control">
-          <span class="row"><span class="name">Patches</span><span class="val" id="vSoccerPatches">50</span></span>
-          <input type="range" id="soccerPatches" min="0" max="100" value="50" />
-        </label>
-      </div>
-
       <div id="parametricControls" style="display:none">
         <label class="control">
           <span class="row"><span class="name">Curves</span><span class="val" id="vParamCurves">5</span></span>
@@ -195,6 +192,48 @@
         <label class="control">
           <span class="row"><span class="name">Recursion</span><span class="val" id="vParamRecursion">0</span></span>
           <input type="range" id="paramRecursion" min="0" max="100" value="0" />
+        </label>
+      </div>
+
+      <div id="sankeyControls" style="display:none">
+        <label class="control">
+          <span class="row"><span class="name">Bundle</span><span class="val" id="vSankeyBundle">38</span></span>
+          <input type="range" id="sankeyBundle" min="0" max="100" value="38" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Center</span><span class="val" id="vSankeyCenter">50</span></span>
+          <input type="range" id="sankeyCenter" min="0" max="100" value="50" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Width</span><span class="val" id="vSankeyWidth">38</span></span>
+          <input type="range" id="sankeyWidth" min="0" max="100" value="38" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Gate color</span></span>
+          <input type="color" id="sankeyGateColor" value="#EDECE8" />
+        </label>
+      </div>
+
+      <div id="ovalControls" style="display:none">
+        <label class="control">
+          <span class="row"><span class="name">Size</span><span class="val" id="vOvalSize">60</span></span>
+          <input type="range" id="ovalSize" min="1" max="100" value="60" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Aspect</span><span class="val" id="vOvalAspect">45</span></span>
+          <input type="range" id="ovalAspect" min="1" max="100" value="45" />
+        </label>
+        <label class="control">
+          <span class="row"><span class="name">Tilt</span><span class="val" id="vOvalTilt">30</span></span>
+          <input type="range" id="ovalTilt" min="0" max="100" value="30" />
+        </label>
+        <label class="control" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="ovalDashed" checked style="margin:0;" />
+          <span class="name">Dashed</span>
+        </label>
+        <label class="control" id="ovalDashGroup">
+          <span class="row"><span class="name">Dash length</span><span class="val" id="vOvalDash">40</span></span>
+          <input type="range" id="ovalDash" min="1" max="100" value="40" />
         </label>
       </div>
 
@@ -381,12 +420,18 @@
       </label>
 
       <h2>Export</h2>
-      <button type="button" id="exportPng">PNG</button>
-      <button type="button" id="exportSvg">SVG</button>
-      <button type="button" id="exportGif">GIF</button>
-      <button type="button" id="exportWebm">WebM</button>
-      <button type="button" id="exportMp4">MP4</button>
-      <span id="exportStatus" aria-live="polite" style="font-size:0.6875rem;font-weight:500;color:var(--muted);margin-left:4px;transition:opacity 0.4s;"></span>
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;margin-bottom:8px;cursor:pointer;">
+        <input type="checkbox" id="transparentBg" style="margin:0;" />
+        <span>transparent bg</span>
+      </label>
+      <div class="actions">
+        <button type="button" id="exportPng">PNG</button>
+        <button type="button" id="exportSvg">SVG</button>
+        <button type="button" id="exportGif">GIF</button>
+        <button type="button" id="exportWebm">WebM</button>
+        <button type="button" id="exportMp4">MP4</button>
+      </div>
+      <span id="exportStatus" aria-live="polite" style="display:block;margin-top:6px;font-size:0.6875rem;font-weight:500;color:var(--muted);transition:opacity 0.4s;"></span>
     </aside>
 
     <div class="preview-wrap" style="order: 2">
@@ -410,6 +455,6 @@
 
     <script src="vendor/gifjs/gif.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
-    <script src="og-nvidia-05-preview.js?v=20260521-png-export"></script>
+    <script type="module" src="og-ui.js"></script>
   </body>
 </html>

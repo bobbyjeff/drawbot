@@ -2,7 +2,7 @@
   "use strict";
 
   const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: true });
   const W = 2400, H = 1260;
   const VIEW_SCALE = 2;
 
@@ -70,6 +70,11 @@
      the exact simulated time it would have at that position in the loop,
      matching the live preview. -1 means use real wall-clock time. */
   let _exportFrameIndex = -1;
+  let _skipBg = false;
+  function fillBackground(p) {
+    if (_skipBg) { ctx.clearRect(0, 0, W, H); }
+    else { ctx.fillStyle = p.bg; ctx.fillRect(0, 0, W, H); }
+  }
   function segNow(p) {
     if (_exportFrameIndex >= 0) return _exportFrameIndex / p.emergeFr;
     return (performance.now() / 1000) * (p.fps / p.emergeFr);
@@ -242,8 +247,7 @@
     });
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const VH = H / VIEW_SCALE;
       const bendVal = parseInt(document.getElementById("convergeBend").value, 10) / 100;
@@ -269,24 +273,6 @@
 
       for (let i = 0; i < N; i++) {
         drawLineSegment(BENT_LINES[i], 0, 1, p.strokeColor, p.strokeW, bentConvergeX, bentConvergeY);
-      }
-
-      if (p.nodeEnabled) {
-        const s = VIEW_SCALE;
-        ctx.fillStyle = p.nodeColor;
-        for (let i = 0; i < N; i++) {
-          const line = BENT_LINES[i];
-          const p0x = LEFT_X * s, p0y = line.sy * s;
-          const p1x = line.c1x * s, p1y = line.c1y * s;
-          const p2x = line.c2x * s, p2y = line.c2y * s;
-          const p3x = bentConvergeX * s, p3y = bentConvergeY * s;
-          applyNodes(CONVERGE_NODE_DESCS[i], p, (pos) => {
-            const pt = bezierPoint(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, pos);
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, p.strokeW * 2, 0, Math.PI * 2);
-            ctx.fill();
-          });
-        }
       }
 
       if (p.segEnabled) {
@@ -331,6 +317,25 @@
             const bb  = Math.round(lerp(cb, gb, fadeBlend));
             drawLineSegment(line, cs.s0, cs.s1, `rgb(${br},${bg2},${bb})`, p.strokeW, bentConvergeX, bentConvergeY);
           }
+        }
+      }
+
+      /* Nodes drawn last so they always appear on top of lines and segments */
+      if (p.nodeEnabled) {
+        const s = VIEW_SCALE;
+        ctx.fillStyle = p.nodeColor;
+        for (let i = 0; i < N; i++) {
+          const line = BENT_LINES[i];
+          const p0x = LEFT_X * s, p0y = line.sy * s;
+          const p1x = line.c1x * s, p1y = line.c1y * s;
+          const p2x = line.c2x * s, p2y = line.c2y * s;
+          const p3x = bentConvergeX * s, p3y = bentConvergeY * s;
+          applyNodes(CONVERGE_NODE_DESCS[i], p, (pos) => {
+            const pt = bezierPoint(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, pos);
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
       }
     }
@@ -404,8 +409,7 @@
     const SPEED_NODE_DESCS = Array.from({ length: N }, (_, i) => makeNodes(0xC0DE1000 + i * 13, 8));
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const spaceVal = parseInt(document.getElementById("speedSpace").value, 10) / 100;
       const velVal = parseInt(document.getElementById("speedVelocity").value, 10) / 100;
@@ -600,8 +604,7 @@
     }
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const depthVal = parseInt(document.getElementById("perspDepth").value, 10) / 100;
       const angleVal = parseInt(document.getElementById("perspAngle").value, 10) / 100;
@@ -645,11 +648,11 @@
         return `rgb(${r},${g},${b})`;
       }
 
+      /* Pass 1: rings + segments */
       for (let r = 0; r < ringCount; r++) {
         const rawT = (r + animShift) / ringCount;
         const t2 = 1 - (Math.exp(expK * (1 - rawT)) - 1) / expDenom;
 
-        /* Cull rings that have faded completely into the background */
         if (t2 >= FADE_END) continue;
 
         const hw = lerp(outerHW, outerHW * minScale, t2);
@@ -663,23 +666,12 @@
         const lw = p.strokeW / sv;
         drawRoundedRect(cx, cy, hw, hh, cornerR, ringColor, lw);
 
-        if (p.nodeEnabled) {
-          applyNodes(PERSP_NODES[r % PERSP_NODES.length], p, (pos) => {
-            const pt = roundRectPoint(cx, cy, hw, hh, pos);
-            ctx.beginPath();
-            ctx.arc(pt.x * sv, pt.y * sv, p.strokeW * 2, 0, Math.PI * 2);
-            ctx.fillStyle = p.nodeColor;
-            ctx.fill();
-          });
-        }
-
         if (p.segEnabled) {
           applySegs(PERSP_SEGS[r % PERSP_SEGS.length], gp, p, (s0, s1, color) => {
             const perimCanvas = 4 * (hw + hh) * sv;
             const segLen = (s1 - s0) * perimCanvas;
             ctx.setLineDash([segLen, Math.max(perimCanvas - segLen, 0)]);
             ctx.lineDashOffset = -s0 * perimCanvas;
-            /* Segments also fade with depth */
             const segFadeT = clamp((t2 - FADE_START) / (FADE_END - FADE_START), 0, 1);
             const sr2 = parseInt(color.slice(1,3)||'0',16)||0, sg2 = parseInt(color.slice(3,5)||'0',16)||0, sb2 = parseInt(color.slice(5,7)||'0',16)||0;
             const sc = `rgb(${Math.round(sr2+(bgR-sr2)*segFadeT)},${Math.round(sg2+(bgG-sg2)*segFadeT)},${Math.round(sb2+(bgB-sb2)*segFadeT)})`;
@@ -687,6 +679,26 @@
           });
           ctx.setLineDash([]);
           ctx.lineDashOffset = 0;
+        }
+      }
+
+      /* Pass 2: nodes on top of everything */
+      if (p.nodeEnabled) {
+        for (let r = 0; r < ringCount; r++) {
+          const rawT = (r + animShift) / ringCount;
+          const t2 = 1 - (Math.exp(expK * (1 - rawT)) - 1) / expDenom;
+          if (t2 >= FADE_END) continue;
+          const hw = lerp(outerHW, outerHW * minScale, t2);
+          const hh = lerp(outerHH, outerHH * minScale, t2);
+          const cx = lerp(VW / 2, vpX, t2);
+          const cy = lerp(VH / 2, vpY, t2);
+          applyNodes(PERSP_NODES[r % PERSP_NODES.length], p, (pos) => {
+            const pt = roundRectPoint(cx, cy, hw, hh, pos);
+            ctx.beginPath();
+            ctx.arc(pt.x * sv, pt.y * sv, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
         }
       }
 
@@ -731,8 +743,7 @@
     const GESTURE_NODES = makeNodes(0xC0DE3000, 12);
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const scaleVal = parseInt(document.getElementById("gestScale").value, 10) / 100;
       const ampVal = parseInt(document.getElementById("gestAmp").value, 10) / 100;
@@ -834,20 +845,6 @@
         }
       }
 
-      if (p.nodeEnabled) {
-        ctx.fillStyle = p.nodeColor;
-        applyNodes(GESTURE_NODES, p, (pos) => {
-          const fi = pos * (points.length - 1);
-          const i0 = Math.min(Math.floor(fi), points.length - 2);
-          const frac = fi - i0;
-          const x = lerp(points[i0].x, points[i0 + 1].x, frac);
-          const y = lerp(points[i0].y, points[i0 + 1].y, frac);
-          ctx.beginPath();
-          ctx.arc(x * sv, y * sv, p.strokeW * 2, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
-
       if (p.segEnabled && fragVal < 0.01) {
         applySegs(GESTURE_SEGS, gp, p, (s0, s1, color) => {
           const i0 = Math.floor(s0 * (points.length - 1));
@@ -861,6 +858,20 @@
           ctx.moveTo(points[i0].x * sv, points[i0].y * sv);
           for (let si = i0 + 1; si <= i1; si++) ctx.lineTo(points[si].x * sv, points[si].y * sv);
           ctx.stroke();
+        });
+      }
+
+      if (p.nodeEnabled) {
+        ctx.fillStyle = p.nodeColor;
+        applyNodes(GESTURE_NODES, p, (pos) => {
+          const fi = pos * (points.length - 1);
+          const i0 = Math.min(Math.floor(fi), points.length - 2);
+          const frac = fi - i0;
+          const x = lerp(points[i0].x, points[i0 + 1].x, frac);
+          const y = lerp(points[i0].y, points[i0 + 1].y, frac);
+          ctx.beginPath();
+          ctx.arc(x * sv, y * sv, p.strokeW * 2, 0, Math.PI * 2);
+          ctx.fill();
         });
       }
     }
@@ -995,8 +1006,7 @@
     function render(fi, p) {
       const tot = p.emergeFr;
       const gp  = ((fi % tot) + tot) % tot / tot;
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
       ctx.strokeStyle = p.strokeColor;
       ctx.lineWidth   = p.strokeW;
       ctx.lineJoin    = "round";
@@ -1190,8 +1200,7 @@
     }
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const tot  = p.emergeFr;
       const t    = ((fi % tot) + tot) % tot;
@@ -1206,49 +1215,21 @@
       ctx.lineCap   = "round";
       ctx.lineJoin  = "round";
 
+      /* Pass 1: planes + segments */
       for (let i = 0; i < NUM_PLANES; i++) {
-        /* phase 0 = narrow/far, phase 1 = wide/close (then wraps back) */
         const phase = (gp + i / NUM_PLANES) % 1;
-        const hw    = phase * MAX_HW * sv;   /* canvas px */
+        const hw    = phase * MAX_HW * sv;
 
-        /* Smooth fade in/out at the wrap boundary */
         const raw   = phase < FADE_IN
           ? phase / FADE_IN
           : phase > 1 - FADE_OUT
             ? (1 - phase) / FADE_OUT
             : 1;
-        const alpha = raw * raw * (3 - 2 * raw);  /* smoothstep */
+        const alpha = raw * raw * (3 - 2 * raw);
 
         ctx.globalAlpha = alpha;
         ctx.strokeStyle = p.strokeColor;
         drawPlane(cxPx, hw, tyPx, byPx);
-
-        if (p.nodeEnabled && hw >= sv) {
-          const rx   = cxPx + hw;
-          const lx   = cxPx - hw;
-          const dLen = Math.sqrt((rx - lx) ** 2 + vLen ** 2);
-          const totalLen = 2 * vLen + 2 * dLen;
-          applyNodes(PLANES_NODE_DESCS[i], p, (pos) => {
-            const d = pos * totalLen;
-            let nx, ny;
-            if (d < vLen) {
-              nx = rx; ny = byPx - d;
-            } else if (d < vLen + dLen) {
-              const t = (d - vLen) / dLen;
-              nx = rx + (lx - rx) * t; ny = tyPx + (byPx - tyPx) * t;
-            } else if (d < 2 * vLen + dLen) {
-              const t = (d - vLen - dLen) / vLen;
-              nx = lx; ny = byPx - vLen * t;
-            } else {
-              const t = (d - 2 * vLen - dLen) / dLen;
-              nx = lx + (rx - lx) * t; ny = tyPx + (byPx - tyPx) * t;
-            }
-            ctx.beginPath();
-            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
-            ctx.fillStyle = p.nodeColor;
-            ctx.fill();
-          });
-        }
 
         if (p.segEnabled && hw >= sv) {
           const rx      = cxPx + hw;
@@ -1274,6 +1255,45 @@
           ctx.lineDashOffset = 0;
           ctx.strokeStyle    = p.strokeColor;
           ctx.lineWidth      = p.strokeW;
+        }
+      }
+
+      /* Pass 2: nodes on top of all planes and segments */
+      if (p.nodeEnabled) {
+        for (let i = 0; i < NUM_PLANES; i++) {
+          const phase = (gp + i / NUM_PLANES) % 1;
+          const hw    = phase * MAX_HW * sv;
+          if (hw < sv) continue;
+          const raw   = phase < FADE_IN
+            ? phase / FADE_IN
+            : phase > 1 - FADE_OUT
+              ? (1 - phase) / FADE_OUT
+              : 1;
+          ctx.globalAlpha = raw * raw * (3 - 2 * raw);
+          const rx   = cxPx + hw;
+          const lx   = cxPx - hw;
+          const dLen = Math.sqrt((rx - lx) ** 2 + vLen ** 2);
+          const totalLen = 2 * vLen + 2 * dLen;
+          applyNodes(PLANES_NODE_DESCS[i], p, (pos) => {
+            const d = pos * totalLen;
+            let nx, ny;
+            if (d < vLen) {
+              nx = rx; ny = byPx - d;
+            } else if (d < vLen + dLen) {
+              const t2 = (d - vLen) / dLen;
+              nx = rx + (lx - rx) * t2; ny = tyPx + (byPx - tyPx) * t2;
+            } else if (d < 2 * vLen + dLen) {
+              const t2 = (d - vLen - dLen) / vLen;
+              nx = lx; ny = byPx - vLen * t2;
+            } else {
+              const t2 = (d - 2 * vLen - dLen) / dLen;
+              nx = lx + (rx - lx) * t2; ny = tyPx + (byPx - tyPx) * t2;
+            }
+            ctx.beginPath();
+            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
         }
       }
 
@@ -1333,8 +1353,7 @@
     }
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       ctx.strokeStyle = p.strokeColor;
       ctx.lineWidth   = p.strokeW;
@@ -1376,27 +1395,11 @@
         const ry     = rx * ecc;
         const yCtr   = R * Math.cos(theta);
 
+        /* Pass 1: ring stroke */
         ctx.globalAlpha = alpha * sizeAlpha;
         ctx.beginPath();
         ctx.ellipse(0, yCtr * sv, Math.max(rx * sv, 0.5), Math.max(ry * sv, 0.5), 0, 0, Math.PI * 2);
         ctx.stroke();
-
-        if (p.nodeEnabled) {
-          /* Nodes disappear sooner than rings as size shrinks —
-             squaring sizeAlpha makes them fade twice as fast. */
-          const savedAlpha = ctx.globalAlpha;
-          ctx.globalAlpha  = savedAlpha * sizeAlpha;
-          applyNodes(SPHERE_NODES[i % SPHERE_NODES.length], p, (pos) => {
-            const angle = pos * Math.PI * 2;
-            const nx = rx * sv * Math.cos(angle);
-            const ny = yCtr * sv + ry * sv * Math.sin(angle);
-            ctx.beginPath();
-            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
-            ctx.fillStyle = p.nodeColor;
-            ctx.fill();
-          });
-          ctx.globalAlpha = savedAlpha;
-        }
 
         if (p.segEnabled) {
           applySegs(SPHERE_SEGS[i % SPHERE_SEGS.length], rawPhase, p, (s0, s1, color) => {
@@ -1407,6 +1410,38 @@
             ctx.stroke();
           });
           ctx.strokeStyle = p.strokeColor;
+        }
+      }
+
+      /* Pass 2: nodes on top of all rings and segments */
+      if (p.nodeEnabled) {
+        const ringCountN = parseInt(document.getElementById('sphereRings')?.value ?? '8', 10);
+        for (let i = 0; i < ringCountN; i++) {
+          const rawPhaseN = ((fi % CYCLE_FRAMES) / CYCLE_FRAMES + i / ringCountN) % 1;
+          const phase_N   = ((rawPhaseN % 1) + 1) % 1;
+          const alphaN    = ringAlpha(phase_N);
+          if (alphaN < 0.02) continue;
+          const thetaN  = Math.acos(clamp(1 - 2 * phase_N, -1, 1));
+          const sinTN   = Math.sin(thetaN);
+          const sinPowN = Math.pow(sinTN, RADIUS_POW);
+          const rxN     = R * sinPowN;
+          if (rxN < MIN_RX) continue;
+          const SIZE_FULL_N  = R * 0.48;
+          const sizeTN       = Math.max(0, Math.min(1, (rxN - MIN_RX) / (SIZE_FULL_N - MIN_RX)));
+          const sizeAlphaN   = sizeTN * sizeTN * (3 - 2 * sizeTN);
+          const eccN  = ECC_POL + (ECC_EQ - ECC_POL) * sinPowN;
+          const ryN   = rxN * eccN;
+          const yCtrN = R * Math.cos(thetaN);
+          ctx.globalAlpha = alphaN * sizeAlphaN * sizeAlphaN;
+          applyNodes(SPHERE_NODES[i % SPHERE_NODES.length], p, (pos) => {
+            const angle = pos * Math.PI * 2;
+            const nx = rxN * sv * Math.cos(angle);
+            const ny = yCtrN * sv + ryN * sv * Math.sin(angle);
+            ctx.beginPath();
+            ctx.arc(nx, ny, p.strokeW * 2, 0, Math.PI * 2);
+            ctx.fillStyle = p.nodeColor;
+            ctx.fill();
+          });
         }
       }
 
@@ -1547,8 +1582,7 @@
       /* N_A driven by the Curves slider: visible total = N_A + N_B = N_A + 1 */
       const N_A = Math.max(1, parseInt(document.getElementById('paramCurves')?.value ?? '3', 10) - 1);
 
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const δ = (fi % T) / T * Math.PI * 2;
       δ_holder.δ = δ;
@@ -1609,6 +1643,18 @@
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
+      if (p.segEnabled) {
+        /* Family A segments */
+        for (let k = 0; k < N_A; k++) {
+          const φ = k * Math.PI * 2 / N_A;
+          applyParametricSegs(PARAM_SEGS_A[k % PARAM_SEGS_A.length], p, φ, 0, true);
+        }
+
+        /* Family B segments */
+        applyParametricSegs(PARAM_SEGS_B, p, 0, 0, false);
+      }
+
+      /* Nodes drawn last so they always appear on top of curves and segments */
       if (p.nodeEnabled) {
         ctx.globalAlpha = 1;
         ctx.fillStyle   = p.nodeColor;
@@ -1639,17 +1685,6 @@
             ctx.fill();
           });
         }
-      }
-
-      if (p.segEnabled) {
-        /* Family A segments */
-        for (let k = 0; k < N_A; k++) {
-          const φ = k * Math.PI * 2 / N_A;
-          applyParametricSegs(PARAM_SEGS_A[k % PARAM_SEGS_A.length], p, φ, 0, true);
-        }
-
-        /* Family B segments */
-        applyParametricSegs(PARAM_SEGS_B, p, 0, 0, false);
       }
     }
 
@@ -1821,8 +1856,7 @@
       const IW = W - 2 * TM_MARGIN;
       const IH = H - 2 * TM_MARGIN;
 
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const complexityVal = parseInt(document.getElementById("tmComplexity").value, 10) / 100;
       const scaleVal      = parseInt(document.getElementById("tmScale").value,      10) / 100;
@@ -2034,8 +2068,7 @@
     }
 
     function render(fi, p) {
-      ctx.fillStyle = p.bg;
-      ctx.fillRect(0, 0, W, H);
+      fillBackground(p);
 
       const spinVal  = parseInt(document.getElementById('soccerSpin')?.value    ?? '50', 10) / 100;
       const patchVal = parseInt(document.getElementById('soccerPatches')?.value ?? '50', 10) / 100;
@@ -2140,8 +2173,552 @@
     return { render };
   })();
 
+  /* ══════════════════════════════════════════
+     ORIGIN preset — recursive rounded rects
+     ══════════════════════════════════════════
+     Design: nested rounded rects converging toward a vanishing point,
+     like Illustrator blend-tool steps between a large front rect and a
+     small back rect.  Bend moves the back rect off-centre so the stack
+     tilts into perspective.  Everything is canvas-native paths so
+     lineDash follows corners automatically.
+  ══════════════════════════════════════════ */
+  const origin = (function () {
+    const sv = VIEW_SCALE;
+    const VW = RIGHT_X;
+    const VH = H / VIEW_SCALE;
 
-  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric, treemap, soccer };
+    const ORIGIN_SEGS = Array.from({ length: 40 }, (_, i) => makeSegs(0x05161000 + i * 19, 2));
+
+    /* Smooth sine ping-pong: 0→1→0 with no sharp acceleration peaks */
+    function easePingPong(gp) {
+      // sin⁴ lingers near ext=0 (loop point) far longer than sin²,
+      // giving an "almost pause" before snapping up through the cycle.
+      const s = Math.sin(gp * Math.PI);
+      return s * s * s * s;
+    }
+
+    /* Build the native canvas path for a rounded rect (no stroke — caller decides) */
+    function rrectPath(cx, cy, hw, hh, cr) {
+      const x = (cx - hw) * sv, y = (cy - hh) * sv;
+      const w = hw * 2 * sv, h = hh * 2 * sv, r = cr * sv;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.arcTo(x + w, y,     x + w, y + r,     r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+      ctx.lineTo(x + r, y + h);
+      ctx.arcTo(x,     y + h, x,     y + h - r, r);
+      ctx.lineTo(x,     y + r);
+      ctx.arcTo(x,     y,     x + r, y,         r);
+      ctx.closePath();
+    }
+
+    /* Approximate true perimeter of a rounded rect */
+    function rrectPerim(hw, hh, cr) {
+      return Math.max(1, 2 * (hw + hh) * 2 * sv - 8 * cr * sv + 2 * Math.PI * cr * sv);
+    }
+
+    /*
+     * Draw an open sub-path for the fraction [s0, s1] of the rrect perimeter.
+     * Origin is at (0,0) in local canvas space (after ctx.translate/rotate).
+     * Works for both canvas and SVG export - no lineDash needed.
+     * Perimeter order (CW): top → top-right arc → right → bottom-right arc
+     *                     → bottom → bottom-left arc → left → top-left arc
+     */
+    function rrectSpanPath(hw, hh, cr, s0, s1) {
+      const sw = hw - cr;   // half of straight top/bottom edge
+      const sh = hh - cr;   // half of straight left/right edge
+      const qa = Math.PI * 0.5;
+      const qa_cr = qa * cr;
+      const segLens = [2*sw, qa_cr, 2*sh, qa_cr, 2*sw, qa_cr, 2*sh, qa_cr];
+      const P = segLens.reduce((a, b) => a + b, 0);
+      if (P < 1e-6) return;
+
+      // Cumulative fraction boundary for each of the 8 segments
+      const b = [0];
+      for (const l of segLens) b.push(b[b.length - 1] + l / P);
+
+      // Return canvas-pixel [x, y] at perimeter fraction f
+      function ptAt(f) {
+        f = ((f % 1) + 1) % 1;
+        for (let i = 0; i < 8; i++) {
+          if (f <= b[i + 1] + 1e-9) {
+            const span = b[i + 1] - b[i];
+            const t = span > 1e-12 ? Math.max(0, Math.min(1, (f - b[i]) / span)) : 0;
+            switch (i) {
+              // top straight: (-sw,-hh) → (sw,-hh)
+              case 0: return [lerp(-sw,  sw,  t) * sv, -hh * sv];
+              // top-right arc: center (sw, -sh), angles -π/2 → 0
+              case 1: { const a = -qa + qa * t; return [(sw  + cr * Math.cos(a)) * sv, (-sh + cr * Math.sin(a)) * sv]; }
+              // right straight: (hw,-sh) → (hw, sh)
+              case 2: return [hw * sv, lerp(-sh, sh, t) * sv];
+              // bottom-right arc: center (sw, sh), angles 0 → π/2
+              case 3: { const a = qa * t;         return [(sw  + cr * Math.cos(a)) * sv, (sh  + cr * Math.sin(a)) * sv]; }
+              // bottom straight: (sw, hh) → (-sw, hh)
+              case 4: return [lerp( sw, -sw, t) * sv,  hh * sv];
+              // bottom-left arc: center (-sw, sh), angles π/2 → π
+              case 5: { const a = qa + qa * t;    return [(-sw + cr * Math.cos(a)) * sv, (sh  + cr * Math.sin(a)) * sv]; }
+              // left straight: (-hw, sh) → (-hw, -sh)
+              case 6: return [-hw * sv, lerp( sh, -sh, t) * sv];
+              // top-left arc: center (-sw, -sh), angles π → 3π/2
+              case 7: { const a = Math.PI + qa * t; return [(-sw + cr * Math.cos(a)) * sv, (-sh + cr * Math.sin(a)) * sv]; }
+            }
+          }
+        }
+        return [-sw * sv, -hh * sv]; // fallback = path start
+      }
+
+      // Straight segments need only 2 samples; arc quarters need ~8 for smoothness.
+      // Use 24 uniform steps — always enough for any span up to full perimeter.
+      const STEPS = 24;
+      ctx.beginPath();
+      for (let i = 0; i <= STEPS; i++) {
+        const f = s0 + (s1 - s0) * (i / STEPS);
+        const [x, y] = ptAt(f);
+        if (i === 0) ctx.moveTo(x, y);
+        else         ctx.lineTo(x, y);
+      }
+    }
+
+    function readOriginSliders() {
+      const g = id => parseInt(document.getElementById(id).value, 10) / 100;
+      return {
+        aspect:      g("originAspect"),
+        corner:      g("originCorner"),
+        depth:       g("originDepth"),
+        bend:        g("originBend"),
+        perspective:  g("originPerspective"),
+        direction:    g("originDirection"),
+        orientation:  g("originOrientation"),
+        space:        g("originSpace"),
+        scale:        g("originScale"),
+      };
+    }
+
+    function render(fi, p) {
+      fillBackground(p);
+
+      const o = readOriginSliders();
+
+      /* ── geometry ─────────────────────────────────────────────────── */
+      const N  = Math.round(lerp(4, 28, o.depth));
+      const ar = lerp(0.5, 2.2, o.aspect);
+      const maxSize = lerp(120, 420, o.scale);
+      const frontHW = maxSize * Math.sqrt(ar);
+      const frontHH = maxSize / Math.sqrt(ar);
+
+      /* Back rect scale: perspective controls convergence, independent of depth.
+         0 = near-orthographic (shapes barely shrink)
+         1 = strong perspective (shapes shrink to a point) */
+      const backScale = lerp(0.88, 0.04, o.perspective);
+      const backHW    = frontHW * backScale;
+      const backHH    = frontHH * backScale;
+
+      /* Front centre — always canvas centre */
+      const p0x = VW * 0.5, p0y = VH * 0.5;
+
+      /* Back centre — Direction sets the angle, Bend controls offset magnitude */
+      const dirAngle = o.direction * Math.PI * 2;
+      const bendMag  = (o.bend - 0.5) * VW * 0.55;
+      const bx  = bendMag * Math.cos(dirAngle);
+      const by  = bendMag * Math.sin(dirAngle);
+      const p2x = p0x + bx, p2y = p0y + by;
+
+      /* Quadratic bezier control point — perpendicular to chord.
+         Curvature scales with path length so the arc stays proportional:
+         small offset → subtle arc, large offset → visible arc, never a U-loop.
+         Coefficient 0.8 is ~1.5× the original 0.55, so the bend is clearly visible. */
+      const mx  = (p0x + p2x) * 0.5, my = (p0y + p2y) * 0.5;
+      const ddx = p2x - p0x, ddy = p2y - p0y;
+      const len = Math.sqrt(ddx * ddx + ddy * ddy) || 1;
+      const nx  = -ddy / len, ny = ddx / len;              /* unit perpendicular */
+      const curvature = len * (o.bend - 0.5) * 0.8;
+      const p1x = mx + nx * curvature, p1y = my + ny * curvature;
+
+      /* Space: log-scale power curve so space=0.5 is always perfectly even.
+         pow(2.5, 2*s-1):  s=0 → 0.40 (shapes bunch at back, wide front gaps)
+                           s=0.5 → 1.0 (even)
+                           s=1 → 2.5 (shapes bunch at front, wide back gaps) */
+      const spacePow = Math.pow(2.5, 2 * o.space - 1);
+      function pathT(i) {
+        if (N <= 1) return 0;
+        return Math.pow(i / (N - 1), spacePow);
+      }
+
+      /* ── animation ─────────────────────────────────────────────────── */
+      const tot    = p.emergeFr;
+      const gp     = (((fi % tot) + tot) % tot) / tot;
+      const ext    = easePingPong(gp);
+      const reveal = 1 + ext * (N - 1);
+
+      /* ── colour helpers ─────────────────────────────────────────────── */
+      const bgR = parseInt(p.bg.slice(1,3),16), bgG = parseInt(p.bg.slice(3,5),16), bgB = parseInt(p.bg.slice(5,7),16);
+      const fgR = parseInt(p.strokeColor.slice(1,3),16), fgG = parseInt(p.strokeColor.slice(3,5),16), fgB = parseInt(p.strokeColor.slice(5,7),16);
+      const lw  = p.strokeW / sv;
+
+      ctx.lineCap  = "round";
+      ctx.lineJoin = "round";
+
+      /* Orientation: rotate every shape around its own centre */
+      const orientAngle = o.orientation * Math.PI * 2;
+
+      /* ── draw back → front ─────────────────────────────────────────── */
+      for (let ri = 0; ri < N; ri++) {
+        const idx = N - 1 - ri;      /* back → front */
+        const t   = pathT(idx);      /* 0 = front, 1 = back */
+
+        /* Reveal alpha: clamp reveal-idx to [0,1] — rings fade in AND out
+           smoothly instead of scaling in from nothing. */
+        const revealAlpha = clamp(reveal - idx, 0, 1);
+        if (revealAlpha <= 0) continue;
+
+        /* Size: clean geometric progression, always full size */
+        const hw = lerp(frontHW, backHW, t);
+        const hh = lerp(frontHH, backHH, t);
+        if (hw < 0.75 || hh < 0.75) continue;
+
+        /* Centre: pure quadratic bezier */
+        const cx = (1-t)*(1-t)*p0x + 2*(1-t)*t*p1x + t*t*p2x;
+        const cy = (1-t)*(1-t)*p0y + 2*(1-t)*t*p1y + t*t*p2y;
+
+        const cr = Math.min(hw, hh) * lerp(0, 0.42, o.corner);
+
+        /* Combined alpha: depth fade × reveal fade */
+        const depthAlpha = lerp(1.0, 0.12, t * t);
+        const alpha       = depthAlpha * revealAlpha;
+        const strokeW     = lw * sv;
+
+        /* Each shape is drawn in its own local transform so orientation
+           rotates around the shape's centre without affecting the path. */
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(cx * sv, cy * sv);
+        ctx.rotate(orientAngle);
+
+        if (!p.segEnabled) {
+          ctx.strokeStyle = p.strokeColor;
+          ctx.lineWidth   = strokeW;
+          ctx.setLineDash([]);
+          rrectPath(0, 0, hw, hh, cr);
+          ctx.stroke();
+        } else {
+          /* Ghost full outline at reduced opacity, seg dashes at full local alpha */
+          ctx.strokeStyle = p.strokeColor;
+          ctx.lineWidth   = strokeW;
+          ctx.globalAlpha = alpha * 0.22;
+          ctx.setLineDash([]);
+          rrectPath(0, 0, hw, hh, cr);
+          ctx.stroke();
+
+          applySegs(ORIGIN_SEGS[idx % ORIGIN_SEGS.length], gp, p, (s0, s1, segColor) => {
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = segColor;
+            ctx.lineWidth   = strokeW;
+            ctx.setLineDash([]);
+            rrectSpanPath(hw, hh, cr, s0, s1);
+            ctx.stroke();
+          });
+        }
+
+        if (p.nodeEnabled) {
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle   = p.nodeColor;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(0, 0, Math.max(strokeW * 1.4, 2.5), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    return { render };
+  })();
+
+
+  /* ══════════════════════════════════════════
+     SANKEY preset
+     ══════════════════════════════════════════ */
+  const sankey = (function () {
+    const sv = VIEW_SCALE;
+    const VW = RIGHT_X;  // 1200
+
+    /* Custom segs: always-positive drift (L→R), integer multiples of LOOP_BASE
+       so all segments complete integer cycles together → clean loop point.
+       At frames=40, fps=24: segT advances at 0.6×/s.
+       LOOP_BASE=1.8 → mult=1 cycles in 1/(1.8×0.6)≈0.93s; mult=3 → 0.31s
+       — matches converge's visual pace (COLOR_ZONE×mult ≈ 0.67–2.0 drift).
+       Outer lines (far from CY) get more segments; inner lines fewer — mirrors
+       how converge scales segment count by normDist.                          */
+    /* snapDrift = Math.max(1, Math.round(drift × speedSc)) is always integer,
+       so the loop advance over emergeFr frames is exactly snapDrift → seamless seam.
+       At default speedSc = lerp(0.2,1.8,0.5) = 1.0: snapDrift = drift = 1,2,3.
+       LOOP_BASE=1.0 → mult=1 gives 1 crossing per 50-frame / 25-fps = 2 s loop. */
+    const SANKEY_LOOP_BASE = 1.0;
+    const MAX_DIST_SK = Math.max(...START_YS.map(sy => Math.abs(sy - CY)));
+    const SANKEY_NORM_DIST = START_YS.map(sy => Math.abs(sy - CY) / MAX_DIST_SK);
+
+    const SANKEY_SEG_DESCS = Array.from({ length: N }, (_, i) => {
+      const rng = mulberry32(0xCAFE0000 + i * 37);
+      const nd  = SANKEY_NORM_DIST[i];
+      // outer lines: 2 segs; inner lines: 1 seg — fewer = more breathing room
+      const count = nd > 0.5 ? 2 : 1;
+      return Array.from({ length: count }, () => {
+        const mult = 1 + Math.floor(rng() * 2);          // 1 or 2 × only — keeps crossings slow/moderate
+        return {
+          pos:   rng(),
+          width: lerp(0.02, lerp(0.05, 0.14, nd), rng()),
+          drift: SANKEY_LOOP_BASE * mult,
+          phase: rng(),
+        };
+      });
+    });
+
+
+    const SANKEY_NODE_DESCS = Array.from({ length: N }, (_, i) => makeNodes(0xB00B0000 + i*41, 6));
+
+    function readSliders() {
+      const g = id => parseInt(document.getElementById(id).value, 10) / 100;
+      return {
+        bundle:    g('sankeyBundle'),
+        center:    g('sankeyCenter'),
+        width:     g('sankeyWidth'),
+        gateColor: document.getElementById('sankeyGateColor').value,
+      };
+    }
+
+    /* ── one-way funnel path per line ───────────────────────────────────
+       Shape:  [left flat] → [smooth curve in] → [right flat at bundle y]
+       The right side does NOT spread back out — lines stay close together.
+
+         x ∈ [0,  x0]  → y = sy   (spread, flat)
+         x ∈ [x0, x1]  → y = smootherstep from sy to cy
+         x ∈ [x1, VW]  → y = cy   (bundled, flat)
+
+       Smootherstep: f(u)=6u⁵−15u⁴+10u³  gives f'=0 and f''=0 at both
+       ends (C2 continuity) — corners are truly invisible, no kink at all.  */
+
+    // smootherstep: zero first AND second derivative at u=0 and u=1
+    function ss(u) { return u * u * u * (u * (u * 6 - 15) + 10); }
+
+    function makeDesc(sy, cy, x0, x1) {
+      return { sy, cy, x0, x1 };
+    }
+
+    function samplePath(d, t) {
+      t = clamp(t, 0, 1);
+      const x = t * VW;
+      let y;
+      if      (x <= d.x0) { y = d.sy; }
+      else if (x <= d.x1) { y = lerp(d.sy, d.cy, ss((x - d.x0) / (d.x1 - d.x0))); }
+      else                 { y = d.cy; }
+      return { x, y };
+    }
+
+    function drawSpan(d, t0, t1, color, lw) {
+      if (t1 <= t0) return;
+      // Use enough steps so the curve section (≈40% of path) gets fine resolution.
+      // Each step = VW/STEPS virtual units; STEPS=96 → ~12.5 vu/step (~19 px).
+      const STEPS = 96;
+      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let i = 0; i <= STEPS; i++) {
+        const pt = samplePath(d, lerp(t0, t1, i / STEPS));
+        if (i === 0) ctx.moveTo(pt.x * sv, pt.y * sv);
+        else         ctx.lineTo(pt.x * sv, pt.y * sv);
+      }
+      ctx.stroke();
+    }
+
+    /* Quintic ease near gate t-values: wide zone (0.12) + u^5 gives a sharp
+       fast→slow→fast contrast — segments sprint between gates and nearly
+       pause at the dashed checkpoint lines, then accelerate back out.       */
+    function cpEase(pos, et1, et2) {
+      const zone = 0.07;
+      let p = pos;
+      for (const cp of [et1, et2]) {
+        const d = p - cp, ad = Math.abs(d);
+        if (ad < zone) {
+          const u = ad / zone;              // 0 at gate, 1 at zone edge
+          p = cp + Math.sign(d) * u * u * u * u * u * zone;  // u^5: very slow near gate
+        }
+      }
+      return p;
+    }
+
+    function render(fi, p) {
+      fillBackground(p);
+
+      const s  = readSliders();
+      const lw = p.strokeW;
+
+      // x0: left gate (curve starts), x1: right gate (curve ends, bundle stays flat)
+      // center slider shifts the curve zone horizontally
+      const cxZone = VW * clamp(s.center, 0.1, 0.9);
+      const halfSp = lerp(0.12, 0.38, s.width) * VW;
+      const x0 = clamp(cxZone - halfSp, VW * 0.02, VW * 0.60);
+      const x1 = clamp(cxZone + halfSp, VW * 0.15, VW * 0.97);
+
+      // Gate t-values are exact (t = x/VW)
+      const easeT1 = x0 / VW;
+      const easeT2 = x1 / VW;
+
+      const descs = START_YS.map(sy => {
+        const cy = lerp(CY, sy, clamp(s.bundle, 0.02, 1));
+        return makeDesc(sy, cy, x0, x1);
+      });
+
+      const cp1x = x0;
+      const cp2x = x1;
+
+      function hexCh(hex, o) { return parseInt(hex.slice(o, o+2), 16); }
+      const bgR=hexCh(p.bg,1), bgG=hexCh(p.bg,3), bgB=hexCh(p.bg,5);
+      const fgR=hexCh(p.strokeColor,1), fgG=hexCh(p.strokeColor,3), fgB=hexCh(p.strokeColor,5);
+      const sgR=hexCh(p.segColor,1), sgG=hexCh(p.segColor,3), sgB=hexCh(p.segColor,5);
+
+      /* ── ghost lines ─────────────────────────────────────────────── */
+      const ga = 0.30;
+      const ghost = `rgb(${Math.round(lerp(bgR,fgR,ga))},${Math.round(lerp(bgG,fgG,ga))},${Math.round(lerp(bgB,fgB,ga))})`;
+      for (let i = 0; i < N; i++) drawSpan(descs[i], 0, 1, ghost, lw);
+
+      /* ── dashed gate lines ───────────────────────────────────────── */
+      const gcHex = s.gateColor;
+      const gcR = parseInt(gcHex.slice(1,3),16);
+      const gcG = parseInt(gcHex.slice(3,5),16);
+      const gcB = parseInt(gcHex.slice(5,7),16);
+      ctx.save();
+      ctx.setLineDash([6*sv, 5*sv]);
+      ctx.strokeStyle = `rgba(${gcR},${gcG},${gcB},0.65)`;
+      ctx.lineWidth = 1.5*sv; ctx.lineCap = 'butt';
+      for (const gx of [cp1x, cp2x]) {
+        ctx.beginPath();
+        ctx.moveTo(gx*sv, START_TOP*sv*0.5);
+        ctx.lineTo(gx*sv, START_BOT*sv*1.05);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]); ctx.restore();
+
+      /* ── animated segments — left→right only, no wrap-around ───────── */
+      if (p.segEnabled) {
+        const segT    = segNow(p);  // frame-index during export, wall-clock during live
+        const speedSc = lerp(0.2, 1.8, p.segSpeed);
+        const sizeSc  = lerp(0.1, 2.0, p.segSize);
+        const segsPerLineFrac = clamp(p.segDensity * 2, 0.15, 1.0);
+        const segCol  = `rgb(${sgR},${sgG},${sgB})`;
+        for (let i = 0; i < N; i++) {
+          const d = descs[i];
+          const allSegs = SANKEY_SEG_DESCS[i];
+          const nShow   = Math.max(1, Math.round(allSegs.length * segsPerLineFrac));
+          for (let j = 0; j < nShow; j++) {
+            const cs = allSegs[j];
+            // snapDrift is the nearest integer ≥ 1 to drift×speedSc.
+            // Using integer drift means the loop advance is exactly integer → seamless GIF.
+            // Both live preview and export use this same formula so pacing is identical.
+            // segNow() returns frame/emergeFr during export and wall-clock time during live,
+            // so no separate export branch is needed.
+            const snapDrift = Math.max(1, Math.round(cs.drift * speedSc));
+            const raw = (cs.pos + (segT + cs.phase) * snapDrift) % 1;
+            const pos = cpEase(raw, easeT1, easeT2);
+            const hw  = cs.width * sizeSc * 0.5;
+            // Clamp to [0,1] — segments enter from left edge, exit at right, no teleport
+            const s0  = clamp(pos - hw, 0, 1);
+            const s1  = clamp(pos + hw, 0, 1);
+            if (s1 > s0) drawSpan(d, s0, s1, segCol, lw);
+          }
+        }
+      }
+
+      /* ── nodes ───────────────────────────────────────────────────── */
+      if (p.nodeEnabled) {
+        ctx.fillStyle = p.nodeColor;
+        const nodeSz = Math.max(p.strokeW*1.4, 2.5*sv);
+        for (let i = 0; i < N; i++) {
+          applyNodes(SANKEY_NODE_DESCS[i], p, (pos) => {
+            const pt = samplePath(descs[i], cpEase(pos, easeT1, easeT2));
+            ctx.beginPath(); ctx.arc(pt.x*sv, pt.y*sv, nodeSz, 0, Math.PI*2); ctx.fill();
+          });
+        }
+      }
+    }
+
+    return { render };
+  })();
+
+  /* ── Oval preset ──────────────────────────────────────────────────────────
+     A single ellipse that "rotates" along its long axis: the minor axis is
+     animated via cos²(gp×π) so it collapses smoothly to a line at gp=0.5
+     and returns to full at gp=1, making a seamless loop.                   */
+  /* ── Oval overlay — breathing ellipse drawn on top of another preset ── */
+  const ovalOverlay = (() => {
+    const sv = VIEW_SCALE;
+    const VW = W / VIEW_SCALE;   // 1200 — full virtual width
+    const VH = H / VIEW_SCALE;   // 630  — full virtual height
+
+    function draw(fi, p) {
+      const size   = parseInt(document.getElementById('ovalSize').value,   10) / 100;
+      const aspect = parseInt(document.getElementById('ovalAspect').value, 10) / 100;
+      const tilt   = parseInt(document.getElementById('ovalTilt').value,   10) / 100;
+      const dashed = document.getElementById('ovalDashed').checked;
+      const dash   = parseInt(document.getElementById('ovalDash').value,   10) / 100;
+
+      const cx = VW / 2, cy = VH / 2;
+      const gp = segNow(p) % 1;
+
+      const a    = VW * lerp(0.12, 0.46, size);
+      const bMax = a  * lerp(0.22, 0.80, aspect);
+
+      /* Breath profile: cos²(π·gp) — one slow, perfectly smooth collapse and
+         reopen per loop. C1-continuous everywhere (no corner at edge-on, no
+         snap), so the motion reads as a long inhale/exhale.                   */
+      const cosV   = Math.cos(gp * Math.PI);
+      const breath = cosV * cosV;                       /* 1 → 0 → 1 over the loop */
+      const b = Math.max(bMax * breath, p.strokeW * 0.5 / sv);
+
+      const angle = lerp(-Math.PI / 3, Math.PI / 3, tilt);
+
+      ctx.save();
+      ctx.translate(cx * sv, cy * sv);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, a * sv, b * sv, 0, 0, Math.PI * 2);
+
+      if (dashed) {
+        const dashPx    = lerp(4, 70, dash) * sv;
+        const dashGap   = dashPx * 0.6;
+        /* Dash drift: a barely-perceptible ~12% of circumference per 8s loop.
+           Quantized to whole dash periods at the seam for a clean loop point. */
+        const circ      = Math.PI * a * sv * 2;
+        const period    = dashPx + dashGap;
+        const marchSpan = Math.max(period, Math.round(circ * 0.12 / period) * period);
+        const marchDist = gp * marchSpan;
+        ctx.setLineDash([dashPx, dashGap]);
+        ctx.lineDashOffset = -marchDist;
+      }
+
+      ctx.strokeStyle = p.strokeColor;
+      ctx.lineWidth   = p.strokeW;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    return { draw };
+  })();
+
+  /* ══════════════════════════════════════════
+     ORIGIN LAUNCH — parametric Lissajous grid with the breathing
+     oval overlaid on top. Both control groups stay active.
+     ══════════════════════════════════════════ */
+  const originLaunch = {
+    render(fi, p) {
+      parametric.render(fi, p);   /* fills background + draws Lissajous */
+      ovalOverlay.draw(fi, p);
+    },
+  };
+
+  const presets = { converge, speed, perspective, gesture, wind, planes, sphere, parametric, treemap, soccer, origin, sankey, originLaunch };
 
   function readParams() {
     const el = id => document.getElementById(id);
@@ -2208,8 +2785,9 @@
         const scale   = Math.min(cW / W, cH / H);
         const offsetX = (cW - W * scale) / 2;
         const offsetY = (cH - H * scale) / 2;
-        ctx.fillStyle = p.bg;
-        ctx.fillRect(0, 0, cW, cH);
+        /* Use fillBackground so _skipBg (transparent export) is respected */
+        if (_skipBg) { ctx.clearRect(0, 0, cW, cH); }
+        else { ctx.fillStyle = p.bg; ctx.fillRect(0, 0, cW, cH); }
         ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
       }
       presets[activePreset].render(fi, p);
@@ -2250,7 +2828,7 @@
       const N_A_current = curves - 1;
       const T_param     = 480;
       const loopFrames  = Math.round(T_param / N_A_current);
-      if (activePreset === "parametric") {
+      if (activePreset === "parametric" || activePreset === "originLaunch") {
         el("emergeFr").value = String(loopFrames);
         el("vEmergeFr").textContent = String(loopFrames);
       }
@@ -2298,6 +2876,30 @@
       el("vSoccerSpin").textContent    = el("soccerSpin").value;
       el("vSoccerPatches").textContent = el("soccerPatches").value;
     }
+    if (document.getElementById("originAspect")) {
+      el("vOriginAspect").textContent       = el("originAspect").value;
+      el("vOriginCorner").textContent       = el("originCorner").value;
+      el("vOriginDepth").textContent        = el("originDepth").value;
+      el("vOriginBend").textContent         = el("originBend").value;
+      el("vOriginPerspective").textContent  = el("originPerspective").value;
+      el("vOriginDirection").textContent   = el("originDirection").value;
+      el("vOriginOrientation").textContent = el("originOrientation").value;
+      el("vOriginSpace").textContent       = el("originSpace").value;
+      el("vOriginScale").textContent        = el("originScale").value;
+    }
+    if (activePreset === 'sankey') {
+      el("vSankeyBundle").textContent = el("sankeyBundle").value;
+      el("vSankeyCenter").textContent = el("sankeyCenter").value;
+      el("vSankeyWidth").textContent  = el("sankeyWidth").value;
+    }
+    if (activePreset === 'originLaunch' && document.getElementById('ovalSize')) {
+      el("vOvalSize").textContent   = el("ovalSize").value;
+      el("vOvalAspect").textContent = el("ovalAspect").value;
+      el("vOvalTilt").textContent   = el("ovalTilt").value;
+      el("vOvalDash").textContent   = el("ovalDash").value;
+      const dashGroup = el("ovalDashGroup");
+      if (dashGroup) dashGroup.style.display = el("ovalDashed").checked ? "" : "none";
+    }
   }
 
   function updatePresetUI() {
@@ -2305,10 +2907,13 @@
     document.getElementById("speedControls").style.display        = activePreset === "speed"        ? "" : "none";
     document.getElementById("perspectiveControls").style.display  = activePreset === "perspective"  ? "" : "none";
     document.getElementById("gestureControls").style.display      = activePreset === "gesture"      ? "" : "none";
-    document.getElementById("parametricControls").style.display   = activePreset === "parametric"   ? "" : "none";
+    document.getElementById("parametricControls").style.display   = (activePreset === "parametric" || activePreset === "originLaunch") ? "" : "none";
     document.getElementById("sphereControls").style.display       = activePreset === "sphere"       ? "" : "none";
     document.getElementById("treemapControls").style.display      = activePreset === "treemap"      ? "" : "none";
     document.getElementById("soccerControls").style.display       = activePreset === "soccer"       ? "" : "none";
+    document.getElementById("originControls").style.display       = activePreset === "origin"       ? "" : "none";
+    document.getElementById("sankeyControls").style.display       = activePreset === "sankey"       ? "" : "none";
+    document.getElementById("ovalControls").style.display         = activePreset === "originLaunch" ? "" : "none";
   }
 
   function paint() {
@@ -2324,7 +2929,7 @@
   }
 
   function segLoopActive() {
-    return el("segEnabled").checked || el("nodeEnabled").checked;
+    return el("segEnabled").checked || el("nodeEnabled").checked || activePreset === "originLaunch" || activePreset === "sankey";
   }
 
   function startSegLoop() {
@@ -2410,16 +3015,12 @@
 
   el("exportPng").addEventListener("click", () => {
     const p = readParams();
-    /* Render at 2× OG (2400×1260) regardless of current canvas mode */
-    const offscreen = document.createElement("canvas");
-    offscreen.width  = W;
-    offscreen.height = H;
-    const offCtx = canvas.getContext("2d");
-    /* Re-render the current frame into the main canvas at OG size, then snapshot */
     const prevMode = canvasMode;
     canvasMode = "og";
     applyCanvasMode();
+    _skipBg = !!(el("transparentBg") && el("transparentBg").checked);
     paint();
+    _skipBg = false;
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a   = document.createElement("a");
@@ -2427,7 +3028,6 @@
       a.download = `og-${activePreset}.png`;
       a.click();
       URL.revokeObjectURL(url);
-      /* Restore previous canvas mode */
       canvasMode = prevMode;
       applyCanvasMode();
       paint();
@@ -2439,31 +3039,146 @@
     const svgElements = [];
     let currentBg = p.bg;
 
-    const origStroke = ctx.stroke.bind(ctx);
-    const origFillRect = ctx.fillRect.bind(ctx);
-    const origBeginPath = ctx.beginPath.bind(ctx);
-    const origMoveTo = ctx.moveTo.bind(ctx);
-    const origLineTo = ctx.lineTo.bind(ctx);
+    /* ── transform tracking ─────────────────────────────────────────────
+       Some presets use ctx.save/translate/rotate to position shapes. The
+       SVG exporter must apply the same accumulated matrix to all recorded
+       coordinates so paths and nodes land in the right place. */
+    let svgMatStack = [{ a:1, b:0, c:0, d:1, tx:0, ty:0 }];
+    function svgMat() { return svgMatStack[svgMatStack.length - 1]; }
+    function matMul(m, n) {
+      return {
+        a:  m.a*n.a  + m.c*n.b,   b:  m.b*n.a  + m.d*n.b,
+        c:  m.a*n.c  + m.c*n.d,   d:  m.b*n.c  + m.d*n.d,
+        tx: m.a*n.tx + m.c*n.ty + m.tx,
+        ty: m.b*n.tx + m.d*n.ty + m.ty,
+      };
+    }
+    function svgPt(x, y) {
+      const m = svgMat();
+      return [(m.a*x + m.c*y + m.tx) / VIEW_SCALE, (m.b*x + m.d*y + m.ty) / VIEW_SCALE];
+    }
+
+    const origSave          = ctx.save.bind(ctx);
+    const origRestore       = ctx.restore.bind(ctx);
+    const origTranslate     = ctx.translate.bind(ctx);
+    const origRotate        = ctx.rotate.bind(ctx);
+    const origStroke        = ctx.stroke.bind(ctx);
+    const origFill          = ctx.fill.bind(ctx);
+    const origFillRect      = ctx.fillRect.bind(ctx);
+    const origBeginPath     = ctx.beginPath.bind(ctx);
+    const origMoveTo        = ctx.moveTo.bind(ctx);
+    const origLineTo        = ctx.lineTo.bind(ctx);
     const origBezierCurveTo = ctx.bezierCurveTo.bind(ctx);
-    const origArcTo = ctx.arcTo.bind(ctx);
-    const origSetLineDash = ctx.setLineDash.bind(ctx);
-    const origEllipse     = ctx.ellipse.bind(ctx);
+    const origArcTo         = ctx.arcTo.bind(ctx);
+    const origArc           = ctx.arc.bind(ctx);
+    const origSetLineDash   = ctx.setLineDash.bind(ctx);
+    const origEllipse       = ctx.ellipse.bind(ctx);
 
     let curPath = "";
     let curDash = [];
-    ctx.beginPath = function () { curPath = ""; origBeginPath(); };
-    ctx.moveTo = function (x, y) { curPath += `M${(x/VIEW_SCALE).toFixed(2)},${(y/VIEW_SCALE).toFixed(2)}`; origMoveTo(x, y); };
-    ctx.lineTo = function (x, y) { curPath += `L${(x/VIEW_SCALE).toFixed(2)},${(y/VIEW_SCALE).toFixed(2)}`; origLineTo(x, y); };
-    ctx.bezierCurveTo = function (c1x,c1y,c2x,c2y,ex,ey) {
-      curPath += `C${(c1x/VIEW_SCALE).toFixed(2)},${(c1y/VIEW_SCALE).toFixed(2)} ${(c2x/VIEW_SCALE).toFixed(2)},${(c2y/VIEW_SCALE).toFixed(2)} ${(ex/VIEW_SCALE).toFixed(2)},${(ey/VIEW_SCALE).toFixed(2)}`;
-      origBezierCurveTo(c1x,c1y,c2x,c2y,ex,ey);
+    /* Track current point in local canvas-pixel space so arcTo can compute
+       tangent points correctly. Reset on beginPath/moveTo/lineTo/arcTo. */
+    let svgCurX = 0, svgCurY = 0;
+
+    /* Transform intercepts */
+    ctx.save = function () {
+      svgMatStack.push({ ...svgMat() });
+      origSave();
     };
-    ctx.arcTo = function (x1,y1,x2,y2,r) {
-      curPath += `L${(x1/VIEW_SCALE).toFixed(2)},${(y1/VIEW_SCALE).toFixed(2)}`;
-      origArcTo(x1,y1,x2,y2,r);
+    ctx.restore = function () {
+      if (svgMatStack.length > 1) svgMatStack.pop();
+      origRestore();
+    };
+    ctx.translate = function (tx, ty) {
+      svgMatStack[svgMatStack.length - 1] = matMul(svgMat(), { a:1, b:0, c:0, d:1, tx, ty });
+      origTranslate(tx, ty);
+    };
+    ctx.rotate = function (angle) {
+      const cs = Math.cos(angle), sn = Math.sin(angle);
+      /* Canvas 2D rotate matrix: [cos, sin, -sin, cos, 0, 0] */
+      svgMatStack[svgMatStack.length - 1] = matMul(svgMat(), { a:cs, b:sn, c:-sn, d:cs, tx:0, ty:0 });
+      origRotate(angle);
+    };
+
+    /* Path intercepts — apply current transform to every coordinate */
+    const origClosePath = ctx.closePath.bind(ctx);
+    ctx.beginPath  = function ()    { curPath = ""; svgCurX = 0; svgCurY = 0; origBeginPath(); };
+    ctx.closePath  = function ()    { curPath += "Z"; origClosePath(); };
+    ctx.moveTo = function (x, y) {
+      svgCurX = x; svgCurY = y;
+      const [sx, sy] = svgPt(x, y);
+      curPath += `M${sx.toFixed(2)},${sy.toFixed(2)}`;
+      origMoveTo(x, y);
+    };
+    ctx.lineTo = function (x, y) {
+      svgCurX = x; svgCurY = y;
+      const [sx, sy] = svgPt(x, y);
+      curPath += `L${sx.toFixed(2)},${sy.toFixed(2)}`;
+      origLineTo(x, y);
+    };
+    ctx.bezierCurveTo = function (c1x, c1y, c2x, c2y, ex, ey) {
+      const [sc1x, sc1y] = svgPt(c1x, c1y);
+      const [sc2x, sc2y] = svgPt(c2x, c2y);
+      const [sex,  sey]  = svgPt(ex, ey);
+      curPath += `C${sc1x.toFixed(2)},${sc1y.toFixed(2)} ${sc2x.toFixed(2)},${sc2y.toFixed(2)} ${sex.toFixed(2)},${sey.toFixed(2)}`;
+      svgCurX = ex; svgCurY = ey;
+      origBezierCurveTo(c1x, c1y, c2x, c2y, ex, ey);
+    };
+    /* arcTo: compute true arc tangent points → emit L to arc-start then SVG A arc.
+       Coordinates are in local canvas-pixel space; svgPt() maps them to SVG space.
+       Radii are preserved because our transforms are rotation+translation only (no scale). */
+    ctx.arcTo = function (x1, y1, x2, y2, r) {
+      if (r < 0.01) {
+        svgCurX = x1; svgCurY = y1;
+        const [sx1, sy1] = svgPt(x1, y1);
+        curPath += `L${sx1.toFixed(2)},${sy1.toFixed(2)}`;
+        origArcTo(x1, y1, x2, y2, r);
+        return;
+      }
+      /* Unit vectors along the two edges meeting at the corner (x1,y1) */
+      const dx1 = x1 - svgCurX, dy1 = y1 - svgCurY;
+      const l1  = Math.sqrt(dx1*dx1 + dy1*dy1) || 1;
+      const ux1 = dx1/l1, uy1 = dy1/l1;
+      const dx2 = x2 - x1,  dy2 = y2 - y1;
+      const l2  = Math.sqrt(dx2*dx2 + dy2*dy2) || 1;
+      const ux2 = dx2/l2, uy2 = dy2/l2;
+      /* Tangent length from corner = r / tan(θ/2) where θ = angle between edges */
+      const dot     = ux1*ux2 + uy1*uy2;
+      const sinHalf = Math.sqrt(Math.max(0, (1 - dot) * 0.5));
+      const cosHalf = Math.sqrt(Math.max(0, (1 + dot) * 0.5));
+      const tl      = sinHalf > 0.0001 ? r * cosHalf / sinHalf : r;
+      const cl      = Math.min(tl, l1, l2);  /* clamp to available edge lengths */
+      /* Arc start / end in local canvas-pixel space */
+      const asx = x1 - ux1*cl,  asy = y1 - uy1*cl;
+      const aex = x1 + ux2*cl,  aey = y1 + uy2*cl;
+      /* Line to arc start (omit if already there) */
+      if (Math.abs(asx - svgCurX) > 0.05 || Math.abs(asy - svgCurY) > 0.05) {
+        const [sasx, sasy] = svgPt(asx, asy);
+        curPath += `L${sasx.toFixed(2)},${sasy.toFixed(2)}`;
+      }
+      /* Sweep: cross product d1×d2 > 0 → clockwise in y-down → sweep=1 */
+      const sweep = (ux1*uy2 - uy1*ux2) > 0 ? 1 : 0;
+      const svgR  = (r / VIEW_SCALE).toFixed(2);
+      const [saex, saey] = svgPt(aex, aey);
+      curPath += `A${svgR},${svgR},0,0,${sweep},${saex.toFixed(2)},${saey.toFixed(2)}`;
+      svgCurX = aex; svgCurY = aey;
+      origArcTo(x1, y1, x2, y2, r);
+    };
+    /* ctx.arc — approximate as polygon for SVG; use orig for canvas */
+    ctx.arc = function (cx, cy, r, startAngle, endAngle, anticlockwise) {
+      const STEPS = 36;
+      const dir   = anticlockwise ? -1 : 1;
+      for (let i = 0; i <= STEPS; i++) {
+        const a  = startAngle + dir * (endAngle - startAngle) * i / STEPS;
+        const px = cx + r * Math.cos(a);
+        const py = cy + r * Math.sin(a);
+        const [sx, sy] = svgPt(px, py);
+        curPath += (i === 0 ? `M` : `L`) + `${sx.toFixed(2)},${sy.toFixed(2)}`;
+      }
+      origArc(cx, cy, r, startAngle, endAngle, anticlockwise);
     };
     ctx.setLineDash = function (arr) { curDash = arr || []; origSetLineDash(arr); };
-    /* Intercept ellipse — convert to path points so SVG capture works */
+    /* ctx.ellipse — approximate as polygon for SVG; use orig for canvas */
     ctx.ellipse = function (cx, cy, rx, ry, rotation, startAngle, endAngle) {
       const STEPS = 72;
       const cr = Math.cos(rotation), sr = Math.sin(rotation);
@@ -2472,18 +3187,30 @@
         const ex = rx * Math.cos(a), ey = ry * Math.sin(a);
         const px = cx + ex * cr - ey * sr;
         const py = cy + ex * sr + ey * cr;
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        const [sx, sy] = svgPt(px, py);
+        curPath += (i === 0 ? `M` : `L`) + `${sx.toFixed(2)},${sy.toFixed(2)}`;
       }
       origEllipse(cx, cy, rx, ry, rotation, startAngle, endAngle);
     };
+
+    /* Output intercepts */
     ctx.stroke = function () {
       if (curPath) {
         const alpha  = (ctx.globalAlpha !== undefined && ctx.globalAlpha < 1) ? ` opacity="${ctx.globalAlpha.toFixed(3)}"` : '';
         const dashes = curDash.length >= 2
           ? ` stroke-dasharray="${curDash.map(v => (v/VIEW_SCALE).toFixed(2)).join(' ')}"` : '';
-        svgElements.push(`  <path d="${curPath}" stroke="${ctx.strokeStyle}" stroke-width="${(ctx.lineWidth / VIEW_SCALE).toFixed(2)}" stroke-linecap="${ctx.lineCap}" fill="none"${alpha}${dashes}/>`);
+        const dashOff = ctx.lineDashOffset
+          ? ` stroke-dashoffset="${(-ctx.lineDashOffset / VIEW_SCALE).toFixed(2)}"` : '';
+        svgElements.push(`  <path d="${curPath}" stroke="${ctx.strokeStyle}" stroke-width="${(ctx.lineWidth / VIEW_SCALE).toFixed(2)}" stroke-linecap="${ctx.lineCap}" fill="none"${alpha}${dashes}${dashOff}/>`);
       }
       origStroke();
+    };
+    ctx.fill = function () {
+      if (curPath) {
+        const alpha = (ctx.globalAlpha !== undefined && ctx.globalAlpha < 1) ? ` opacity="${ctx.globalAlpha.toFixed(3)}"` : '';
+        svgElements.push(`  <path d="${curPath}" fill="${ctx.fillStyle}" stroke="none"${alpha}/>`);
+      }
+      origFill();
     };
     ctx.fillRect = function (x, y, w, h) {
       if (w >= W && h >= H) {
@@ -2494,17 +3221,26 @@
       origFillRect(x, y, w, h);
     };
 
+    /* Render at the current frameIndex. Segment timing uses performance.now()
+       (same as live canvas) so positions in the SVG exactly match the preview. */
     renderFrame(frameIndex, p);
 
-    ctx.beginPath = origBeginPath;
-    ctx.moveTo = origMoveTo;
-    ctx.lineTo = origLineTo;
+    ctx.save          = origSave;
+    ctx.restore       = origRestore;
+    ctx.translate     = origTranslate;
+    ctx.rotate        = origRotate;
+    ctx.beginPath     = origBeginPath;
+    ctx.closePath     = origClosePath;
+    ctx.moveTo        = origMoveTo;
+    ctx.lineTo        = origLineTo;
     ctx.bezierCurveTo = origBezierCurveTo;
-    ctx.arcTo = origArcTo;
-    ctx.setLineDash = origSetLineDash;
-    ctx.ellipse     = origEllipse;
-    ctx.stroke = origStroke;
-    ctx.fillRect = origFillRect;
+    ctx.arcTo         = origArcTo;
+    ctx.arc           = origArc;
+    ctx.setLineDash   = origSetLineDash;
+    ctx.ellipse       = origEllipse;
+    ctx.stroke        = origStroke;
+    ctx.fill          = origFill;
+    ctx.fillRect      = origFillRect;
 
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RIGHT_X} ${H/VIEW_SCALE}" width="${RIGHT_X}" height="${H/VIEW_SCALE}">\n  <rect width="100%" height="100%" fill="${currentBg}"/>\n${svgElements.join("\n")}\n</svg>`;
 
@@ -2524,20 +3260,24 @@
     const status = el("exportStatus");
     
 
+    const transparentExport = !!(el("transparentBg") && el("transparentBg").checked);
     const gif = new GIF({
       workers: 2,
       quality: 10,
       width: canvas.width,
       height: canvas.height,
       workerScript: "vendor/gifjs/gif.worker.js",
+      transparent: transparentExport ? 0x00000000 : null,
     });
 
+    _skipBg = transparentExport;
     for (let i = 0; i < tot; i++) {
       _exportFrameIndex = i;
       renderFrame(i, p);
       gif.addFrame(ctx, { copy: true, delay: Math.round(1000 / p.fps) });
     }
     _exportFrameIndex = -1;
+    _skipBg = false;
 
     gif.on("finished", blob => {
       const url = URL.createObjectURL(blob);
@@ -2571,6 +3311,7 @@
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
 
+    _skipBg = !!(el("transparentBg") && el("transparentBg").checked);
     recorder.start();
 
     for (let i = 0; i < tot; i++) {
@@ -2581,6 +3322,7 @@
       exportPct(status, Math.round((i + 1) / tot * 100));
     }
     _exportFrameIndex = -1;
+    _skipBg = false;
 
     recorder.stop();
     await new Promise(r => { recorder.onstop = r; });
@@ -2666,6 +3408,16 @@
     sphere:     { bg: '#2D2D2B', fg: '#CCA78C', frames: 135  },  /* CYCLE_FRAMES/2 = 135 = half rotation (sphere is symmetric at 180°) */
     treemap:    { strokeW: 1, frames: 150, canvasMode: 'og' },    /* OG canvas avoids letterbox margin asymmetry */
     soccer:     { bg: '#181814', fg: '#D0CCBC', frames: 270  },  /* CYCLE_FRAMES = 270 = one full rotation at default spin */
+    origin:     { bg: '#000000', fg: '#FFFFFF', strokeW: 1, frames: 160, canvasMode: 'og', segEnabled: false, nodeEnabled: true },
+    /* fps=25 → delay=40ms = 4 centiseconds exactly (no GIF rounding loss at 30fps).
+       frames=75 → 75×40ms = 3000ms = 3.0s loop. Live preview: 75/25=3.0s. Both exact match.
+       mult ∈ {1,2} → snapDrift 1 or 2 → 1 crossing/3s or 2/3s — slow/moderate pace. */
+    sankey:     { frames: 75, segEnabled: true, sankeyBundle: 38, fps: 25 },
+    /* Parametric grid + breathing oval. frames auto-syncs to 480/(curves-1)
+       for the Lissajous loop; oval breath loops on emergeFr so both stay seamless.
+       fps=20 → 160fr = 8.0s loop, matching the oval's original breath pace.
+       (20fps = 50ms = 5 centiseconds exactly — no GIF rounding loss.) */
+    originLaunch: { bg: '#2D2D2B', fg: '#F44E00', curves: 4, frames: 160, fps: 20, strokeW: 2, segEnabled: false, nodeEnabled: false },
   };
 
   function applyPresetColors(presetName) {
@@ -2673,11 +3425,21 @@
     if (!d) return;
     if (d.bg) { el('bgHex').value = d.bg; el('bgText').value = d.bg.toUpperCase(); }
     if (d.fg) { el('fgHex').value = d.fg; el('fgText').value = d.fg.toUpperCase(); }
+    if (d.segEnabled != null) {
+      el('segEnabled').checked = d.segEnabled;
+      el('segControls').style.display = d.segEnabled ? '' : 'none';
+    }
+    if (d.nodeEnabled != null) {
+      el('nodeEnabled').checked = d.nodeEnabled;
+      el('nodeControls').style.display = d.nodeEnabled ? '' : 'none';
+    }
     if (d.curves != null && document.getElementById('paramCurves')) {
       el('paramCurves').value = String(d.curves);
     }
     if (d.frames) { el('emergeFr').value = d.frames; updateLabels(); }
     if (d.strokeW != null) { el('strokeW').value = String(d.strokeW); updateLabels(); }
+    if (d.sankeyBundle != null && el('sankeyBundle')) { el('sankeyBundle').value = String(d.sankeyBundle); }
+    if (d.fps != null && el('fps')) { el('fps').value = String(d.fps); updateLabels(); }
     if (d.canvasMode) {
       canvasMode = d.canvasMode;
       el('sizeOG').classList.toggle('primary',   d.canvasMode === 'og');
@@ -2697,10 +3459,13 @@
     updatePresetUI();
     if (activePreset === "converge") {
       frameIndex = defaultConvergeFrame(readParams());
-    } else if (activePreset === "wind") {
+    } else if (activePreset === "wind" || activePreset === "origin") {
       frameIndex = 0;
     }
     paint();
+    /* Kick off the rAF loop for wall-clock-animated presets (oval, sankey) */
+    if (segLoopActive() && !playing) startSegLoop();
+    else if (!segLoopActive()) stopSegLoop();
     saveUIState();
   });
 
@@ -2721,7 +3486,8 @@
   });
 
   try {
-    const storedPreset = localStorage.getItem(OG_PRESET_STORAGE_KEY);
+    let storedPreset = localStorage.getItem(OG_PRESET_STORAGE_KEY);
+    if (storedPreset === "oval") storedPreset = "originLaunch";  /* migrated style name */
     if (storedPreset && Object.prototype.hasOwnProperty.call(presets, storedPreset)) {
       activePreset = storedPreset;
       el("preset").value = storedPreset;
@@ -2763,6 +3529,7 @@
       text.value   = hex.toUpperCase();
       grid.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex.toLowerCase()));
       paint();
+      saveUIState();
     }
 
     const NEUTRAL_COUNT = 5;
@@ -2795,7 +3562,7 @@
   buildSwatches('nodeSwatches', 'nodeHex', 'nodeText');
 
   /* ── UI state persistence ── */
-  const OG_STATE_KEY = 'og-nvidia-05-ui-v1';
+  const OG_STATE_KEY = 'og-nvidia-05-ui-v4';
 
   function saveUIState() {
     try {
@@ -2810,7 +3577,23 @@
 
   function restoreUIState() {
     try {
-      const raw = localStorage.getItem(OG_STATE_KEY);
+      let raw = localStorage.getItem(OG_STATE_KEY);
+      /* Migrate from any previous key — preserves user colours across state-key bumps.
+         Override only the fields that changed between versions. */
+      if (!raw) {
+        for (const oldKey of ['og-nvidia-05-ui-v3', 'og-nvidia-05-ui-v2', 'og-nvidia-05-ui-v1']) {
+          const old = localStorage.getItem(oldKey);
+          if (old) {
+            const migrated = JSON.parse(old);
+            /* Apply per-preset timing overrides that changed in this version */
+            migrated.emergeFr = '75';
+            migrated.fps      = '25';
+            raw = JSON.stringify(migrated);
+            localStorage.setItem(OG_STATE_KEY, raw);
+            break;
+          }
+        }
+      }
       if (!raw) return;
       const state = JSON.parse(raw);
       document.querySelectorAll('.controls input, .controls select').forEach(inp => {
@@ -2930,6 +3713,16 @@
     } else if (activePreset === 'soccer') {
       rnd('soccerSpin',    15,  85);
       rnd('soccerPatches',  0, 100);
+    } else if (activePreset === 'origin') {
+      rnd('originAspect',      15, 85);
+      rnd('originCorner',      10, 90);
+      rnd('originDepth',       25, 90);
+      rnd('originBend',        10, 90);
+      rnd('originPerspective', 20, 85);
+      rnd('originDirection',   0,  100);
+      rnd('originOrientation', 0,  100);
+      rnd('originSpace',       20, 85);
+      rnd('originScale',       25, 80);
     }
 
     updateLabels();
@@ -2947,6 +3740,34 @@
   restoreUIState();
   updatePresetUI();  /* re-apply in case preset was changed by restore */
 
+  /* Re-apply timing-only fields from PRESET_DEFAULTS after restore so that
+     colour choices from saved state are always preserved, but loop-length
+     and fps defaults are always correct. Colors are intentionally excluded. */
+  /* One-time: apply the new 2px stroke default for Origin Launch without
+     clobbering future user-chosen widths on every refresh. */
+  try {
+    if (activePreset === 'originLaunch' && !localStorage.getItem('og-ol-stroke-v1')) {
+      el('strokeW').value = '2';
+      localStorage.setItem('og-ol-stroke-v1', '1');
+      saveUIState();
+    }
+  } catch (_) {}
+
+  (function reapplyTimingDefaults() {
+    const TIMING_KEYS = ['frames', 'fps'];
+    const d = PRESET_DEFAULTS[activePreset];
+    if (!d) return;
+    const map = { frames: 'emergeFr', fps: 'fps' };
+    TIMING_KEYS.forEach(k => {
+      if (d[k] == null) return;
+      const elId = map[k] || k;
+      const inp = el(elId);
+      if (inp) inp.value = String(d[k]);
+    });
+    updateLabels();
+    saveUIState();
+  })();
+
   const p0 = readParams();
   if (activePreset === "converge") {
     frameIndex = defaultConvergeFrame(p0);
@@ -2958,4 +3779,6 @@
 
   updateLabels();
   paint();
+  /* Start the rAF loop at page load for wall-clock-animated presets */
+  if (segLoopActive() && !playing) startSegLoop();
 })();
